@@ -1,6 +1,6 @@
 /*
-http://stackoverflow.com/questions/14133115/implementation-of-an-adjacency-list-graph-representation
-http://stackoverflow.com/questions/1112531/what-is-the-best-way-to-use-two-keys-with-a-stdmap
+  http://stackoverflow.com/questions/14133115/implementation-of-an-adjacency-list-graph-representation
+  http://stackoverflow.com/questions/1112531/what-is-the-best-way-to-use-two-keys-with-a-stdmap
 */
 
 #include <assert.h>
@@ -54,11 +54,10 @@ public:
   int get_edge_value(int x, int y) {
     assert(x < vertices);
     assert(y < vertices);
-      if (x == y) {
-          return 0;
-      }
-      
-    else if (costs.find(std::make_pair(x, y)) == costs.end()) {
+
+    if (x == y) {
+      return 0;
+    } else if (costs.find(std::make_pair(x, y)) == costs.end()) {
       return std::numeric_limits<int>::max();
     } else {
       return costs[std::make_pair(x, y)];
@@ -136,61 +135,58 @@ public:
 
   // http://en.wikipedia.org/wiki/Dijkstra's_algorithm
   void dijkstra(int source, int y) {
-      std::map<int, int> dist;
-      std::map<int, int> previous;
-      
+    std::map<int, int> dist;
+    std::map<int, int> previous;
+
     for (int v = 0; v < graph.V(); v++) {
       std::cout << v << std::endl;
-        
-        dist[v] = std::numeric_limits<int>::max();
-        previous[v] = -1;
+
+      dist[v] = std::numeric_limits<int>::max();
+      previous[v] = -1;
     }
-      
-      dist[source] = 0;
-      
-      std::set<int> Q;
-      for (int v = 0; v < graph.V(); v++ ){
-          Q.insert(v);
-      }
-      
-      std::cout << "foo\n";
-      
-      while (!Q.empty()) {
-          // print out all nodes in Q
-          for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
-              std::cout << *iter << " ";
-          }
-          std::cout << "\n";
-          
-          
-          // u := vertex in Q with smallest distance in dist[]
-          int u = -1;
-          int d = std::numeric_limits<int>::max();
-          for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
-              if (dist[*iter] < d) {
-                  u = *iter; //???
-              }
-          }
-          
-          assert(u != -1);
-          // remove u from Q
-          std::cout << "remove node " << u << std::endl;
-          Q.erase(u);
 
-          if (dist[u] == std::numeric_limits<int>::max()) {
-              break;
-          }
-          
-          // print out all nodes in Q
-          //for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
-          //    std::cout << *iter << " ";
-          //}
-          //std::cout << "\n";
+    dist[source] = 0;
 
-          
-          //assert(false);
+    std::set<int> Q;
+    for (int v = 0; v < graph.V(); v++ ){
+      Q.insert(v);
+    }
+
+    std::cout << "foo\n";
+
+    while (!Q.empty()) {
+      // print out all nodes in Q
+      for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
+        std::cout << *iter << " ";
       }
-      
+      std::cout << "\n";
+
+      // u := vertex in Q with smallest distance in dist[]
+      int u = -1;
+      int d = std::numeric_limits<int>::max();
+      for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
+        if (dist[*iter] < d) {
+          u = *iter; //???
+        }
+      }
+
+      assert(u != -1);
+      // remove u from Q
+      std::cout << "remove node " << u << std::endl;
+      Q.erase(u);
+
+      if (dist[u] == std::numeric_limits<int>::max()) {
+        break;
+      }
+
+      // print out all nodes in Q
+      //for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
+      //    std::cout << *iter << " ";
+      //}
+      //std::cout << "\n";
+
+      //assert(false);
+    }
   }
 
   Graph& graph;
