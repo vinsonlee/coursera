@@ -13,7 +13,10 @@
 class Graph {
 
 public:
-  Graph(int vertices) : vertices(vertices), edges(0) {
+  Graph(int vertices)
+  : vertices(vertices),
+    edges(0)
+  {
   }
 
   // Returns the number of vertices in the graph.
@@ -33,12 +36,16 @@ public:
     return costs.find(std::make_pair(x, y)) != costs.end();
   }
 
-  // Lists all nodes y such than there is an edge from x to y.
-  void neighbors(int x) {
-    assert(false);
-    return;
+  // Set nodes to be set of nodes y such than there is an edge from x to y.
+  void neighbors(int x, std::set<int>& nodes) {
+    nodes.clear();
+
+    for (std::set<int>::const_iterator i = graph[x].begin(); i != graph[x].end(); i++) {
+      nodes.insert(*i);
+    }
   }
 
+  // Add the edge from x to y, and vice versa.
   void add(int x, int y) {
     assert(x < vertices);
     assert(y < vertices);
@@ -46,11 +53,7 @@ public:
     graph[y].insert(x);
   }
 
-  void remove(int x, int y) {
-    assert(false);
-    return;
-  }
-
+  // Returns the value associated to the edge (x, y).
   int get_edge_value(int x, int y) {
     assert(x < vertices);
     assert(y < vertices);
@@ -64,6 +67,7 @@ public:
     }
   }
 
+  // Sets the value associated to the edge (x, y) to v.
   void set_edge_value(int x, int y, int v) {
     assert(x < vertices);
     assert(y < vertices);
@@ -84,10 +88,12 @@ public:
     }
   }
 
-  //private:
   int vertices;
   int edges;
+
+  // adjacency list
   std::map<int, std::set<int> > graph;
+
   std::map<std::pair<int, int>, int> costs;
 
 };
@@ -125,58 +131,92 @@ class PriorityQueue {
 class ShortestPath {
 
 public:
-  ShortestPath(Graph& graph) 
+  ShortestPath(Graph& graph)
   : graph(graph)
   {
   }
-  // vertices
-  // path
-  // path_size
 
   // http://en.wikipedia.org/wiki/Dijkstra's_algorithm
-  void dijkstra(int source, int y) {
+  void dijkstra(int source, int target) {
+    // check if already in shortest path
+
     std::map<int, int> dist;
     std::map<int, int> previous;
 
     for (int v = 0; v < graph.V(); v++) {
-      std::cout << v << std::endl;
-
       dist[v] = std::numeric_limits<int>::max();
       previous[v] = -1;
     }
 
     dist[source] = 0;
 
+    // Q is set of all nodes in graph.
     std::set<int> Q;
-    for (int v = 0; v < graph.V(); v++ ){
+    for (int v = 0; v < graph.V(); v++) {
       Q.insert(v);
     }
 
-    std::cout << "foo\n";
-
     while (!Q.empty()) {
-      // print out all nodes in Q
+      std::cout << "Q: ";
       for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
         std::cout << *iter << " ";
       }
       std::cout << "\n";
 
-      // u := vertex in Q with smallest distance in dist[]
+      // Remove u with smallest distance in dist[]
       int u = -1;
       int d = std::numeric_limits<int>::max();
       for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
         if (dist[*iter] < d) {
-          u = *iter; //???
+          u = *iter;
+          d = dist[*iter];
         }
       }
-
+      assert(d != std::numeric_limits<int>::max());
       assert(u != -1);
+
+      // fixme
+      // terminate at target
+      //if (target == u) {
+      //  break;
+      //}
+
       // remove u from Q
-      std::cout << "remove node " << u << std::endl;
+      std::cout << "Remove node " << u << std::endl;
       Q.erase(u);
 
       if (dist[u] == std::numeric_limits<int>::max()) {
+        // std::cout << "inaccessible\n";
         break;
+      }
+
+      // for each neighbor v of u, that is still in Q
+      std::set<int> neighbors;
+      graph.neighbors(u, neighbors);
+
+      std::cout << "Neighbors of node " << u << ": ";
+      for (std::set<int>::const_iterator v = neighbors.begin(); v != neighbors.end(); v++) {
+        if (Q.find(*v) == Q.end()) {
+          continue;
+        }
+        std::cout << *v << " ";
+      }
+      std::cout << std::endl;
+
+      for (std::set<int>::const_iterator v = neighbors.begin(); v != neighbors.end(); v++) {
+        if (Q.find(*v) == Q.end()) {
+          continue;
+        }
+
+        //std::cout << "neighbor: " << *v << std::endl;
+
+        int alt = dist[u] + graph.get_edge_value(u, *v);
+        //std::cout << "alt: " << alt << std::endl;
+
+        if (alt < dist[*v]) {
+          dist[*v] = alt;
+          previous[*v] = u;
+        }
       }
 
       // print out all nodes in Q
@@ -186,11 +226,24 @@ public:
       //std::cout << "\n";
 
       //assert(false);
+      std::cout << "Distance from " << source << std::endl;
+      for (std::map<int, int>::iterator i = dist.begin(); i != dist.end(); i++) {
+        std::cout << source << "->" << i->first << " : " << i->second << std::endl;
+      }
     }
+
+    std::cout << "Distance from " << source << std::endl;
+    for (std::map<int, int>::iterator i = dist.begin(); i != dist.end(); i++) {
+      std::cout << source << "->" << i->first << " : " << i->second << std::endl;
+    }
+
+
+    // store everything in shortests_paths
   }
 
   Graph& graph;
   //PriorityQueue& queue;
+  std::map<std::pair<int, int>, int> shortest_paths;
 
 };
 
@@ -245,10 +298,21 @@ int main() {
   std::cout << G.adjacent(2, 0) << std::endl;
   std::cout << G.adjacent(4, 5) << std::endl;
 
-  std::cout << "DDDDD" << std::endl;
+  std::cout << "neighbors of node 5\n";
+  std::set<int> S;
+  G.neighbors(5, S);
+  for (std::set<int>::const_iterator i = S.begin(); i != S.end(); i++) {
+    std::cout << *i << " ";
+  }
+  std::cout << std::endl;
 
+  std::cout << "DDDDD\n\n" << std::endl;
+
+  std::cout << "shortest path from 7 to 6" << std::endl;
   ShortestPath path = ShortestPath(G);
   path.dijkstra(7, 6);
+
+  //path.dijkstra(6, 7);
 
   return 0;
 }
