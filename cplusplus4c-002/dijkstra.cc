@@ -4,6 +4,7 @@
 */
 
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -17,6 +18,25 @@ public:
   : vertices(vertices),
     edges(0)
   {
+  }
+
+  Graph(int vertices, double edge_density, double range_start, double range_end)
+    : vertices(vertices),
+      edges(0)
+  {
+    for (int i = 0; i < vertices; i++) {
+      for (int j = i + 1; j < vertices; j++) {
+        // http://stackoverflow.com/questions/686353/c-random-float-number-generation
+        // http://stackoverflow.com/questions/1340729/how-do-you-generate-a-random-double-uniformly-distributed-between-0-and-1-from-c
+        double r = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+        (void) r;
+        if (r < edge_density) {
+          add(i, j);
+          double v = range_start + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (range_end - range_start));
+          set_edge_value(i, j, v);
+        }
+      }
+    }
   }
 
   // Returns the number of vertices in the graph.
@@ -87,6 +107,18 @@ public:
       }
       std::cout << std::endl;
     }
+
+    for (int i = 0; i < vertices; i++) {
+      for (int j = i; j < vertices; j++) {
+        if (adjacent(i, j)) {
+          std::cout << i << "->" << j << ": " << get_edge_value(i, j) << std::endl;
+        }
+      }
+    }
+
+    std::cout << "edges: " << edges << std::endl;
+    std::cout << "possible edges: " << vertices * (vertices - 1) / 2 << std::endl;
+    std::cout << "edge density: " << static_cast<double>(edges) / (vertices * (vertices - 1) / 2) << std::endl;
   }
 
   int vertices;
@@ -286,6 +318,12 @@ int main() {
   path.dijkstra(7, 6);
 
   //path.dijkstra(6, 7);
+
+  srand(time(0));
+
+  std::cout << "create random graph\n";
+  Graph graph2 = Graph(50, .4, 1.0, 10.0);
+  graph2.print();
 
   return 0;
 }
