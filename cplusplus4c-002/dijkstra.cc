@@ -36,7 +36,7 @@ public:
     return costs.find(std::make_pair(x, y)) != costs.end();
   }
 
-  // Set nodes to be set of nodes y such than there is an edge from x to y.
+  // Set nodes to be set of y such than there is an edge from x to y.
   void neighbors(int x, std::set<int>& nodes) {
     nodes.clear();
 
@@ -54,7 +54,7 @@ public:
   }
 
   // Returns the value associated to the edge (x, y).
-  int get_edge_value(int x, int y) {
+  double get_edge_value(int x, int y) {
     assert(x < vertices);
     assert(y < vertices);
 
@@ -68,9 +68,10 @@ public:
   }
 
   // Sets the value associated to the edge (x, y) to v.
-  void set_edge_value(int x, int y, int v) {
+  void set_edge_value(int x, int y, double v) {
     assert(x < vertices);
     assert(y < vertices);
+    assert(v > 0);
     edges++;
     costs[std::make_pair(x, y)] = v;
     costs[std::make_pair(y, x)] = v;
@@ -94,7 +95,7 @@ public:
   // adjacency list
   std::map<int, std::set<int> > graph;
 
-  std::map<std::pair<int, int>, int> costs;
+  std::map<std::pair<int, int>, double> costs;
 
 };
 
@@ -113,15 +114,15 @@ public:
 
     // check if already in shortest path
 
-    std::map<int, int> dist;
+    std::map<int, double> dist;
     std::map<int, int> previous;
 
     for (int v = 0; v < graph.V(); v++) {
-      dist[v] = std::numeric_limits<int>::max();
+      dist[v] = std::numeric_limits<double>::infinity();
       previous[v] = -1;
     }
 
-    dist[source] = 0;
+    dist[source] = 0.0;
 
     // Q is set of all nodes in graph.
     std::set<int> Q;
@@ -138,7 +139,7 @@ public:
 
       // Remove u with smallest distance in dist[]
       int u = -1;
-      int d = std::numeric_limits<int>::max();
+      double d = std::numeric_limits<double>::infinity();
       for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
         if (dist[*iter] < d) {
           u = *iter;
@@ -148,7 +149,6 @@ public:
       assert(d != std::numeric_limits<int>::max());
       assert(u != -1);
 
-      // fixme
       // terminate at target
       //if (target == u) {
       //  break;
@@ -183,7 +183,7 @@ public:
 
         //std::cout << "neighbor: " << *v << std::endl;
 
-        int alt = dist[u] + graph.get_edge_value(u, *v);
+        double alt = dist[u] + graph.get_edge_value(u, *v);
         //std::cout << "alt: " << alt << std::endl;
 
         if (alt < dist[*v]) {
@@ -200,13 +200,13 @@ public:
 
       //assert(false);
       std::cout << "Distance from " << source << std::endl;
-      for (std::map<int, int>::iterator i = dist.begin(); i != dist.end(); i++) {
+      for (std::map<int, double>::iterator i = dist.begin(); i != dist.end(); i++) {
         std::cout << source << "->" << i->first << " : " << i->second << std::endl;
       }
     }
 
     std::cout << "Distance from " << source << std::endl;
-    for (std::map<int, int>::iterator i = dist.begin(); i != dist.end(); i++) {
+    for (std::map<int, double>::iterator i = dist.begin(); i != dist.end(); i++) {
       std::cout << source << "->" << i->first << " : " << i->second << std::endl;
     }
 
@@ -216,7 +216,7 @@ public:
 
   Graph& graph;
   //PriorityQueue& queue;
-  std::map<std::pair<int, int>, int> shortest_paths;
+  std::map<std::pair<int, int>, double> shortest_paths;
 
 };
 
@@ -247,21 +247,21 @@ int main() {
 
   G.print();
 
-  G.set_edge_value(0, 2, 1);
-  G.set_edge_value(0, 3, 3);
-  G.set_edge_value(0, 7, 4);
-  G.set_edge_value(1, 3, 4);
-  G.set_edge_value(1, 7, 3);
-  G.set_edge_value(2, 3, 3);
-  G.set_edge_value(2, 4, 1);
-  G.set_edge_value(3, 4, 1);
-  G.set_edge_value(3, 5, 5);
-  G.set_edge_value(3, 7, 7);
-  G.set_edge_value(3, 8, 3);
-  G.set_edge_value(4, 6, 2);
-  G.set_edge_value(4, 8, 4);
-  G.set_edge_value(5, 8, 5);
-  G.set_edge_value(6, 8, 3);
+  G.set_edge_value(0, 2, 1.0);
+  G.set_edge_value(0, 3, 3.0);
+  G.set_edge_value(0, 7, 4.0);
+  G.set_edge_value(1, 3, 4.0);
+  G.set_edge_value(1, 7, 3.0);
+  G.set_edge_value(2, 3, 3.0);
+  G.set_edge_value(2, 4, 1.0);
+  G.set_edge_value(3, 4, 1.0);
+  G.set_edge_value(3, 5, 5.0);
+  G.set_edge_value(3, 7, 7.0);
+  G.set_edge_value(3, 8, 3.0);
+  G.set_edge_value(4, 6, 2.0);
+  G.set_edge_value(4, 8, 4.0);
+  G.set_edge_value(5, 8, 5.0);
+  G.set_edge_value(6, 8, 3.0);
 
 
   std::cout << G.get_edge_value(0, 2) << std::endl;
