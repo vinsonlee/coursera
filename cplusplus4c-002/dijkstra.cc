@@ -3,7 +3,7 @@
   http://stackoverflow.com/questions/1112531/what-is-the-best-way-to-use-two-keys-with-a-stdmap
 */
 
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -99,35 +99,6 @@ public:
 };
 
 
-class PriorityQueue {
-
-  void chgPriority(int priority) {
-    assert(false);
-  }
-
-  int minPriority() {
-    return queue.top();
-  }
-
-  bool contains(int queue_element);
-
-
-  void insert(int queue_element) {
-    queue.push(queue_element);
-  }
-
-  int top() {
-    return queue.top();
-  }
-
-  int size() {
-    return queue.size();
-  }
-
-  std::priority_queue<int> queue;
-};
-
-
 class ShortestPath {
 
 public:
@@ -138,6 +109,8 @@ public:
 
   // http://en.wikipedia.org/wiki/Dijkstra's_algorithm
   void dijkstra(int source, int target) {
+    (void) target;
+
     // check if already in shortest path
 
     std::map<int, int> dist;
