@@ -20,18 +20,21 @@ public:
   {
   }
 
+  // Create a random graph.
   Graph(int vertices, double edge_density, double range_start, double range_end)
     : vertices(vertices),
       edges(0)
   {
+    assert(vertices > 0);
+
     for (int i = 0; i < vertices; i++) {
       for (int j = i + 1; j < vertices; j++) {
         // http://stackoverflow.com/questions/686353/c-random-float-number-generation
         // http://stackoverflow.com/questions/1340729/how-do-you-generate-a-random-double-uniformly-distributed-between-0-and-1-from-c
         double r = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
-        (void) r;
+
         if (r < edge_density) {
-          add(i, j);
+          this->add(i, j);
           double v = range_start + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (range_end - range_start));
           set_edge_value(i, j, v);
         }
@@ -40,24 +43,26 @@ public:
   }
 
   // Returns the number of vertices in the graph.
-  int V() {
+  int V() const {
     return vertices;
   }
 
   // Returns the number of edges in the graph.
-  int E() {
+  int E() const {
     return edges;
   }
 
   // Tests whether there is an edge from node x to node y.
-  bool adjacent(int x, int y) {
-    assert(x < vertices);
-    assert(y < vertices);
+  bool adjacent (const int x, const int y) const {
+    assert(x >=0 && x < vertices);
+    assert(y >=0 && y < vertices);
     return costs.find(std::make_pair(x, y)) != costs.end();
   }
 
   // Set nodes to be set of y such than there is an edge from x to y.
-  void neighbors(int x, std::set<int>& nodes) {
+  void neighbors(const int x, std::set<int>& nodes) {
+    assert(x >=0 && x < vertices);
+
     nodes.clear();
 
     for (std::set<int>::const_iterator i = graph[x].begin(); i != graph[x].end(); i++) {
@@ -66,22 +71,23 @@ public:
   }
 
   // Add the edge from x to y, and vice versa.
-  void add(int x, int y) {
-    assert(x < vertices);
-    assert(y < vertices);
+  void add(const int x, const int y) {
+    assert(x >=0 && x < vertices);
+    assert(y >=0 && y < vertices);
+
     graph[x].insert(y);
     graph[y].insert(x);
   }
 
   // Returns the value associated to the edge (x, y).
   double get_edge_value(int x, int y) {
-    assert(x < vertices);
-    assert(y < vertices);
+    assert(x >=0 && x < vertices);
+    assert(y >=0 && y < vertices);
 
     if (x == y) {
       return 0;
     } else if (costs.find(std::make_pair(x, y)) == costs.end()) {
-      return std::numeric_limits<int>::max();
+      return std::numeric_limits<double>::infinity();
     } else {
       return costs[std::make_pair(x, y)];
     }
@@ -89,9 +95,9 @@ public:
 
   // Sets the value associated to the edge (x, y) to v.
   void set_edge_value(int x, int y, double v) {
-    assert(x < vertices);
-    assert(y < vertices);
-    assert(v > 0);
+    assert(x >=0 && x < vertices);
+    assert(y >=0 && y < vertices);
+    assert(v > 0 && v < std::numeric_limits<double>::infinity());
     edges++;
     costs[std::make_pair(x, y)] = v;
     costs[std::make_pair(y, x)] = v;
@@ -99,7 +105,6 @@ public:
 
   void print() {
     for (std::map<int, std::set<int> >::const_iterator iter = graph.begin(); iter != graph.end(); iter++) {
-      // std::cout << "print" << std::endl;
       std::cout << iter->first;
 
       for (std::set<int>::const_iterator iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++) {
@@ -127,25 +132,21 @@ public:
   // adjacency list
   std::map<int, std::set<int> > graph;
 
+  // edge values
   std::map<std::pair<int, int>, double> costs;
-
 };
 
 
 class ShortestPath {
-
 public:
   ShortestPath(Graph& graph)
   : graph(graph)
   {
   }
 
+
   // http://en.wikipedia.org/wiki/Dijkstra's_algorithm
-  void dijkstra(int source, int target) {
-    (void) target;
-
-    // check if already in shortest path
-
+  void dijkstra(int source) {
     std::map<int, double> dist;
     std::map<int, int> previous;
 
@@ -154,7 +155,7 @@ public:
       previous[v] = -1;
     }
 
-    dist[source] = 0.0;
+    dist[source] = 0;
 
     // Q is set of all nodes in graph.
     std::set<int> Q;
@@ -163,99 +164,63 @@ public:
     }
 
     while (!Q.empty()) {
-      std::cout << "Q: ";
-      for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
-        std::cout << *iter << " ";
-      }
-      std::cout << "\n";
-
       // Remove u with smallest distance in dist[]
-      int u = -1;
+      int u;
       double d = std::numeric_limits<double>::infinity();
-      for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
-        if (dist[*iter] < d) {
+      for (std::set<int>::const_iterator iter = Q.begin(); iter != Q.end(); iter++) {
+        if (dist[*iter] <= d) {
           u = *iter;
           d = dist[*iter];
         }
       }
-      assert(d != std::numeric_limits<int>::max());
-      assert(u != -1);
-
-      // terminate at target
-      //if (target == u) {
-      //  break;
-      //}
 
       // remove u from Q
-      std::cout << "Remove node " << u << std::endl;
       Q.erase(u);
 
-      if (dist[u] == std::numeric_limits<int>::max()) {
-        // std::cout << "inaccessible\n";
+      if (dist[u] == std::numeric_limits<double>::infinity()) {
         break;
       }
 
       // for each neighbor v of u, that is still in Q
       std::set<int> neighbors;
       graph.neighbors(u, neighbors);
-
-      std::cout << "Neighbors of node " << u << ": ";
       for (std::set<int>::const_iterator v = neighbors.begin(); v != neighbors.end(); v++) {
         if (Q.find(*v) == Q.end()) {
           continue;
         }
-        std::cout << *v << " ";
-      }
-      std::cout << std::endl;
-
-      for (std::set<int>::const_iterator v = neighbors.begin(); v != neighbors.end(); v++) {
-        if (Q.find(*v) == Q.end()) {
-          continue;
-        }
-
-        //std::cout << "neighbor: " << *v << std::endl;
 
         double alt = dist[u] + graph.get_edge_value(u, *v);
-        //std::cout << "alt: " << alt << std::endl;
 
         if (alt < dist[*v]) {
           dist[*v] = alt;
           previous[*v] = u;
         }
       }
-
-      // print out all nodes in Q
-      //for (std::set<int>::iterator iter = Q.begin(); iter != Q.end(); iter++) {
-      //    std::cout << *iter << " ";
-      //}
-      //std::cout << "\n";
-
-      //assert(false);
-      std::cout << "Distance from " << source << std::endl;
-      for (std::map<int, double>::iterator i = dist.begin(); i != dist.end(); i++) {
-        std::cout << source << "->" << i->first << " : " << i->second << std::endl;
-      }
     }
-
-    std::cout << "Distance from " << source << std::endl;
-    for (std::map<int, double>::iterator i = dist.begin(); i != dist.end(); i++) {
-      std::cout << source << "->" << i->first << " : " << i->second << std::endl;
-    }
-
 
     // store everything in shortests_paths
+    for (std::map<int, double>::const_iterator i = dist.begin(); i != dist.end(); i++) {
+      shortest_path_values[std::make_pair(source, i->first)] = i->second;
+    }
   }
 
-  Graph& graph;
-  //PriorityQueue& queue;
-  std::map<std::pair<int, int>, double> shortest_paths;
 
+  double get_shortest_path_value(int x, int y) {
+    if (shortest_path_values.find(std::make_pair(x, y)) == shortest_path_values.end()) {
+      this->dijkstra(x);
+    }
+
+    return shortest_path_values[std::make_pair(x, y)];
+  }
+
+
+  Graph& graph;
+  std::map<std::pair<int, int>, double> shortest_path_values;
 };
 
 
 int main() {
-  std::cout << "Hello\n";
-
+#if 0
   Graph G(9);
 
   std::cout << G.V() << std::endl;
@@ -311,19 +276,55 @@ int main() {
   }
   std::cout << std::endl;
 
-  std::cout << "DDDDD\n\n" << std::endl;
-
   std::cout << "shortest path from 7 to 6" << std::endl;
   ShortestPath path = ShortestPath(G);
-  path.dijkstra(7, 6);
-
-  //path.dijkstra(6, 7);
-
-  srand(time(0));
+  std::cout << path.get_shortest_path_value(7, 6) << std::endl;
+  std::cout << path.get_shortest_path_value(7, 6) << std::endl;
 
   std::cout << "create random graph\n";
-  Graph graph2 = Graph(50, .4, 1.0, 10.0);
-  graph2.print();
+  //Graph graph2 = Graph(50, .4, 1.0, 10.0);
+  //graph2.print();
+#endif
+
+  std::cout << "Monte Carlo simulations\n";
+  const int simulations = 10000;
+  std::cout << "simulations: " << simulations << std::endl;
+
+  std::set<double> densities;
+  densities.insert(0.2);
+  densities.insert(0.4);
+
+  for (std::set<double>::const_iterator density = densities.begin(); density != densities.end(); density++) {
+    const int vertices = 50;
+    const double start = 1.0;
+    const double end = 10.0;
+
+    double average_path_total = 0;
+
+    for (int i = 0; i < simulations; i++) {
+      Graph graph = Graph(vertices, *density, start, end);
+      ShortestPath shortest_path = ShortestPath(graph);
+      double total = 0;
+      int no_paths = 0;
+
+      for (int y = 1; y < 50; y++) {
+        double value = shortest_path.get_shortest_path_value(0, y);
+        assert(value > 0);
+
+        if (value == std::numeric_limits<double>::infinity()) {
+          no_paths += 1;
+          continue;
+        }
+
+        total += value;
+      }
+      double average_path = total / (49 - no_paths);
+      average_path_total += average_path;
+    }
+
+    double average = average_path_total / simulations;
+    std::cout << "density " << *density << ": " << average << std::endl;
+  }
 
   return 0;
 }
