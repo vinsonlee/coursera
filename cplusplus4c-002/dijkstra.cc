@@ -11,8 +11,8 @@
 #include <queue>
 #include <set>
 
-class Graph {
 
+class Graph {
 public:
   Graph(int vertices)
   : vertices(vertices),
@@ -36,7 +36,7 @@ public:
         if (r < edge_density) {
           this->add(i, j);
           double v = range_start + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (range_end - range_start));
-          set_edge_value(i, j, v);
+          this->set_edge_value(i, j, v);
         }
       }
     }
@@ -44,67 +44,68 @@ public:
 
   // Returns the number of vertices in the graph.
   int V() const {
-    return vertices;
+    return this->vertices;
   }
 
   // Returns the number of edges in the graph.
   int E() const {
-    return edges;
+    return this->edges;
   }
 
   // Tests whether there is an edge from node x to node y.
   bool adjacent (const int x, const int y) const {
-    assert(x >=0 && x < vertices);
-    assert(y >=0 && y < vertices);
-    return costs.find(std::make_pair(x, y)) != costs.end();
+    assert(x >=0 && x < this->vertices);
+    assert(y >=0 && y < this->vertices);
+    return this->costs.find(std::make_pair(x, y)) != this->costs.end();
   }
 
   // Set nodes to be set of y such than there is an edge from x to y.
   void neighbors(const int x, std::set<int>& nodes) {
-    assert(x >=0 && x < vertices);
+    assert(x >=0 && x < this->vertices);
 
     nodes.clear();
 
-    for (std::set<int>::const_iterator i = graph[x].begin(); i != graph[x].end(); i++) {
+    for (std::set<int>::const_iterator i = this->graph[x].begin(); i != this->graph[x].end(); i++) {
       nodes.insert(*i);
     }
   }
 
   // Add the edge from x to y, and vice versa.
   void add(const int x, const int y) {
-    assert(x >=0 && x < vertices);
-    assert(y >=0 && y < vertices);
+    assert(x >=0 && x < this->vertices);
+    assert(y >=0 && y < this->vertices);
 
-    graph[x].insert(y);
-    graph[y].insert(x);
+    this->graph[x].insert(y);
+    this->graph[y].insert(x);
   }
 
   // Returns the value associated to the edge (x, y).
   double get_edge_value(int x, int y) {
-    assert(x >=0 && x < vertices);
-    assert(y >=0 && y < vertices);
+    assert(x >=0 && x < this->vertices);
+    assert(y >=0 && y < this->vertices);
 
     if (x == y) {
       return 0;
-    } else if (costs.find(std::make_pair(x, y)) == costs.end()) {
+    } else if (this->costs.find(std::make_pair(x, y)) == this->costs.end()) {
       return std::numeric_limits<double>::infinity();
     } else {
-      return costs[std::make_pair(x, y)];
+      return this->costs[std::make_pair(x, y)];
     }
   }
 
   // Sets the value associated to the edge (x, y) to v.
   void set_edge_value(int x, int y, double v) {
-    assert(x >=0 && x < vertices);
-    assert(y >=0 && y < vertices);
+    assert(x >=0 && x < this->vertices);
+    assert(y >=0 && y < this->vertices);
     assert(v > 0 && v < std::numeric_limits<double>::infinity());
     edges++;
-    costs[std::make_pair(x, y)] = v;
-    costs[std::make_pair(y, x)] = v;
+    this->costs[std::make_pair(x, y)] = v;
+    this->costs[std::make_pair(y, x)] = v;
   }
 
+  // Helper function to print out graph contents.
   void print() {
-    for (std::map<int, std::set<int> >::const_iterator iter = graph.begin(); iter != graph.end(); iter++) {
+    for (std::map<int, std::set<int> >::const_iterator iter = this->graph.begin(); iter != this->graph.end(); iter++) {
       std::cout << iter->first;
 
       for (std::set<int>::const_iterator iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++) {
@@ -113,17 +114,17 @@ public:
       std::cout << std::endl;
     }
 
-    for (int i = 0; i < vertices; i++) {
-      for (int j = i; j < vertices; j++) {
-        if (adjacent(i, j)) {
-          std::cout << i << "->" << j << ": " << get_edge_value(i, j) << std::endl;
+    for (int i = 0; i < this->vertices; i++) {
+      for (int j = i; j < this->vertices; j++) {
+        if (this->adjacent(i, j)) {
+          std::cout << i << "->" << j << ": " << this->get_edge_value(i, j) << std::endl;
         }
       }
     }
 
-    std::cout << "edges: " << edges << std::endl;
-    std::cout << "possible edges: " << vertices * (vertices - 1) / 2 << std::endl;
-    std::cout << "edge density: " << static_cast<double>(edges) / (vertices * (vertices - 1) / 2) << std::endl;
+    std::cout << "edges: " << this->edges << std::endl;
+    std::cout << "possible edges: " << this->vertices * (this->vertices - 1) / 2 << std::endl;
+    std::cout << "edge density: " << static_cast<double>(this->edges) / (this->vertices * (this->vertices - 1) / 2) << std::endl;
   }
 
   int vertices;
@@ -151,7 +152,7 @@ public:
     std::map<int, bool> visited;
     std::map<int, int> previous;
 
-    for (int v = 0; v < graph.V(); v++) {
+    for (int v = 0; v < this->graph.V(); v++) {
       dist[v] = std::numeric_limits<double>::infinity();
       visited[v] = false;
       previous[v] = -1;
@@ -182,9 +183,9 @@ public:
       }
 
       std::set<int> neighbors;
-      graph.neighbors(u, neighbors);
+      this->graph.neighbors(u, neighbors);
       for (std::set<int>::const_iterator v = neighbors.begin(); v != neighbors.end(); v++) {
-        double alt = dist[u] + graph.get_edge_value(u, *v);
+        double alt = dist[u] + this->graph.get_edge_value(u, *v);
 
         if (alt < dist[*v] && !visited[*v]) {
           dist[*v] = alt;
@@ -196,21 +197,25 @@ public:
 
     // store everything in shortests_paths
     for (std::map<int, double>::const_iterator i = dist.begin(); i != dist.end(); i++) {
-      shortest_path_values[std::make_pair(source, i->first)] = i->second;
+      this->shortest_path_values[std::make_pair(source, i->first)] = i->second;
     }
   }
 
 
+  // Returns the value of the shortest path between nodes x and y.
   double get_shortest_path_value(int x, int y) {
-    if (shortest_path_values.find(std::make_pair(x, y)) == shortest_path_values.end()) {
+    // Run the algorithm if we haven't calculated the shortest path yet.
+    if (this->shortest_path_values.find(std::make_pair(x, y)) == this->shortest_path_values.end()) {
       this->dijkstra(x);
     }
 
-    return shortest_path_values[std::make_pair(x, y)];
+    return this->shortest_path_values[std::make_pair(x, y)];
   }
 
 
   Graph& graph;
+
+  // Stores the shortest path between two nodes.
   std::map<std::pair<int, int>, double> shortest_path_values;
 };
 
