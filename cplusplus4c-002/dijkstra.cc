@@ -148,20 +148,19 @@ public:
   // http://en.wikipedia.org/wiki/Dijkstra's_algorithm
   void dijkstra(int source) {
     std::map<int, double> dist;
+    std::map<int, bool> visited;
     std::map<int, int> previous;
 
     for (int v = 0; v < graph.V(); v++) {
       dist[v] = std::numeric_limits<double>::infinity();
+      visited[v] = false;
       previous[v] = -1;
     }
 
     dist[source] = 0;
 
-    // Q is set of all nodes in graph.
     std::set<int> Q;
-    for (int v = 0; v < graph.V(); v++) {
-      Q.insert(v);
-    }
+    Q.insert(source);
 
     while (!Q.empty()) {
       // Remove u with smallest distance in dist[]
@@ -176,24 +175,21 @@ public:
 
       // remove u from Q
       Q.erase(u);
+      visited[u] = true;
 
       if (dist[u] == std::numeric_limits<double>::infinity()) {
         break;
       }
 
-      // for each neighbor v of u, that is still in Q
       std::set<int> neighbors;
       graph.neighbors(u, neighbors);
       for (std::set<int>::const_iterator v = neighbors.begin(); v != neighbors.end(); v++) {
-        if (Q.find(*v) == Q.end()) {
-          continue;
-        }
-
         double alt = dist[u] + graph.get_edge_value(u, *v);
 
-        if (alt < dist[*v]) {
+        if (alt < dist[*v] && !visited[*v]) {
           dist[*v] = alt;
           previous[*v] = u;
+          Q.insert(*v);
         }
       }
     }
@@ -276,10 +272,20 @@ int main() {
   }
   std::cout << std::endl;
 
-  std::cout << "shortest path from 7 to 6" << std::endl;
   ShortestPath path = ShortestPath(G);
-  std::cout << path.get_shortest_path_value(7, 6) << std::endl;
-  std::cout << path.get_shortest_path_value(7, 6) << std::endl;
+  //std::cout << "shortest path from 7 to 6" << std::endl;
+  //std::cout << path.get_shortest_path_value(7, 6) << std::endl;
+  //std::cout << path.get_shortest_path_value(7, 6) << std::endl;
+
+  //std::cout << "shortest path from 1 to 2" << std::endl;
+  //std::cout << path.get_shortest_path_value(1, 2) << std::endl;
+
+
+  for (int i = 0; i < G.V(); i++) {
+    for (int j = 0; j < G.V(); j++) {
+      std::cout << i << "->" << j << ": " << path.get_shortest_path_value(i, j) << std::endl;
+    }
+  }
 
   std::cout << "create random graph\n";
   //Graph graph2 = Graph(50, .4, 1.0, 10.0);
