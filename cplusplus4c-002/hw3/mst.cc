@@ -106,6 +106,61 @@ public:
     }
   }
 
+  // Prim's algorithm
+  void prim() {
+    std::cout << "Prim's algorithm\n";
+
+    std::set<int> visited;
+    double total_cost = 0;
+
+    visited.insert(0);
+
+    while (static_cast<int>(visited.size()) < vertices) {
+      double min_cost = std::numeric_limits<double>::infinity();
+      int min_i = -1;
+      int min_j = -1;
+
+      // Find next shortest edge.
+      for (int i = 0; i < vertices; i++) {
+        for (int j = 0; j < vertices; j++) {
+          if (i == j) {
+            continue;
+          }
+
+          // i must have has been visited.
+          if (visited.find(i) == visited.end()) {
+            continue;
+          }
+
+          // j must not have been visited.
+          if (visited.find(j) != visited.end()) {
+            continue;
+          }
+
+          // There must be an edge.
+          if (costs.find(std::make_pair(i, j)) == costs.end()) {
+            continue;
+          }
+
+          if (costs[std::make_pair(i, j)] < min_cost) {
+            //std::cout << i << " " << j << " " << std::endl;
+            min_cost = costs[std::make_pair(i, j)];
+            min_i = i;
+            min_j = j;
+          }
+        }
+      }
+
+      assert(min_cost != std::numeric_limits<double>::infinity());
+      total_cost += min_cost;
+      visited.insert(min_j);
+
+      std::cout << "Edge:" << min_i << "->" << min_j << " Value:" << min_cost << std::endl;
+    }
+
+    std::cout << "minimum spanning tree: " << total_cost << std::endl;
+  }
+
 private:
   int vertices;
   std::map<int, std::set<int> > adjacency_lists;
@@ -116,7 +171,9 @@ private:
 int main() {
   Graph graph = Graph("cplusplus4c-homeworks-Homework3_SampleTestData_mst_data.txt");
   //Graph graph = Graph("tinyEWG.txt");
-  graph.print();
+  //graph.print();
+
+  graph.prim();
 
   return 0;
 }
