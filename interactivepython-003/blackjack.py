@@ -85,22 +85,30 @@ class Hand:
     def draw(self, canvas, pos):
         pass	# draw a hand on the canvas, use the draw method for cards
 
-        
-# define deck class 
+
+# define deck class
 class Deck:
     def __init__(self):
-        pass	# create a Deck object
+        # create a Deck object
+        self.cards = []
+        for suit in SUITS:
+            for rank in RANKS:
+                self.cards.append(Card(suit, rank))
 
     def shuffle(self):
-        # shuffle the deck 
-        pass    # use random.shuffle()
+        # shuffle the deck
+        random.shuffle(self.cards)
 
     def deal_card(self):
-        pass	# deal a card object from the deck
-    
-    def __str__(self):
-        pass	# return a string representing the deck
+        # deal a card object from the deck
+        return self.cards.pop()
 
+    def __str__(self):
+        # return a string representing the deck
+        s = "Deck contains"
+        for card in self.cards:
+            s += " " + str(card)
+        return s
 
 
 #define event handlers for buttons
