@@ -51,21 +51,40 @@ class Card:
 # define hand class
 class Hand:
     def __init__(self):
-        pass	# create Hand object
+        # create Hand object
+        self.cards = []
 
     def __str__(self):
-        pass	# return a string representation of a hand
+        # return a string representation of a hand
+        s = "Hand contains"
+        for card in self.cards:
+            s += " " + str(card)
+        return s
 
     def add_card(self, card):
-        pass	# add a card object to a hand
+        # add a card object to a hand
+        self.cards.append(card)
 
     def get_value(self):
+        # compute the value of the hand, see Blackjack video
+        value = 0
+        has_ace = False
+
+        for card in self.cards:
+            rank = card.get_rank()
+            if rank =='A':
+                has_ace = True
+            value += VALUES[rank]
+
         # count aces as 1, if the hand has an ace, then add 10 to hand value if it doesn't bust
-        pass	# compute the value of the hand, see Blackjack video
-   
+        if has_ace and value + 10 <= 21:
+            value += 10
+
+        return value
+
     def draw(self, canvas, pos):
         pass	# draw a hand on the canvas, use the draw method for cards
- 
+
         
 # define deck class 
 class Deck:
