@@ -88,7 +88,11 @@ class Hand:
         return value
 
     def draw(self, canvas, pos):
-        pass  # draw a hand on the canvas, use the draw method for cards
+        # draw a hand on the canvas, use the draw method for cards
+        i = 0
+        for card in self.cards:
+            card.draw(canvas, (pos[0] + i * CARD_SIZE[0], pos[1]))
+            i += 1
 
 
 # define deck class
@@ -125,13 +129,20 @@ def deal():
     deck.shuffle()
     player_hand = Hand()
     dealer_hand = Hand()
-    player_hand.add_card(deck.deal_card())
-    dealer_hand.add_card(deck.deal_card())
-    player_hand.add_card(deck.deal_card())
-    dealer_hand.add_card(deck.deal_card())
+
+    for i in range(2):
+        player_hand.add_card(deck.deal_card())
+        dealer_hand.add_card(deck.deal_card())
+
+    if in_play:
+        outcome = "You gave up and lose."
+        score -= 1
+    else:
+        outcome = ""
     in_play = True
-    print "Player:", player_hand.get_value(), player_hand
+
     print "Dealer:", dealer_hand.get_value(), dealer_hand
+    print "Player:", player_hand.get_value(), player_hand
 
 
 def hit():
@@ -139,7 +150,6 @@ def hit():
 
     # if the hand is in play, hit the player
     if in_play:
-        print "in play!"
         player_hand.add_card(deck.deal_card())
 
         # if busted, assign a message to outcome, update in_play and score
@@ -148,41 +158,55 @@ def hit():
             in_play = False
             score -= 1
 
-    print "Player:", player_hand.get_value(), player_hand
-    print "Dealer:", dealer_hand.get_value(), dealer_hand
+        print "Dealer:", dealer_hand.get_value(), dealer_hand
+        print "Player:", player_hand.get_value(), player_hand
 
 
 def stand():
-    print "stand"
     global in_play, outcome, score
+
     # if hand is in play, repeatedly hit dealer until his hand has value 17 or more
     if in_play:
-        assert player_hand.get_value() <= 21
-
         while dealer_hand.get_value() < 17:
             dealer_hand.add_card(deck.deal_card())
 
+        # assign a message to outcome, update in_play and score
         if dealer_hand.get_value() > 21:
             outcome = "Dealer busted."
             score += 1
         elif player_hand.get_value() > dealer_hand.get_value():
+            # Dealer wins ties.
+            outcome = "You win."
             score += 1
         else:
+            outcode = "You lose."
             score -= 1
-
         in_play = False
-    # assign a message to outcome, update in_play and score
 
-    print "Player:", player_hand.get_value(), player_hand
-    print "Dealer:", dealer_hand.get_value(), dealer_hand
+        print "Dealer:", dealer_hand.get_value(), dealer_hand
+        print "Player:", player_hand.get_value(), player_hand
 
 
 # draw handler
 def draw(canvas):
-    # test to make sure that card.draw works, replace with your code below
+    dealer_hand.draw(canvas, [100, 200])
+    if in_play:
+        canvas.draw_image(card_back, CARD_BACK_CENTER, CARD_BACK_SIZE, (100 + CARD_CENTER[0], 200 + CARD_CENTER[1]), CARD_SIZE)
+    player_hand.draw(canvas, [100, 400])
 
-    card = Card("S", "A")
-    card.draw(canvas, [300, 300])
+    canvas.draw_text("Blackjack", [150, 80], 40, "Aqua")
+    canvas.draw_text("Score " + str(score), [400, 80], 30, "Black")
+    canvas.draw_text("Dealer", [100, 150], 30, "Black")
+    canvas.draw_text(outcome, [200, 150], 30, "Black")
+    canvas.draw_text("Player", [100, 350], 30, "Black")
+
+    if in_play:
+        action = "Hit or stand?"
+    else:
+        action = "New deal?"
+
+    canvas.draw_text(action, [200, 350], 30, "Black")
+
 
 # initialization frame
 frame = simplegui.create_frame("Blackjack", 600, 600)
@@ -196,10 +220,6 @@ frame.set_draw_handler(draw)
 
 # get things rolling
 deal()
-
 frame.start()
-
-#import sys
-#sys.exit()
 
 # remember to review the gradic rubric
