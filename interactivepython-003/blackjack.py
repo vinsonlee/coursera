@@ -179,7 +179,7 @@ def stand():
             outcome = "You win."
             score += 1
         else:
-            outcode = "You lose."
+            outcome = "You lose."
             score -= 1
         in_play = False
 
