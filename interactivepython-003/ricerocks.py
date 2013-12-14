@@ -228,13 +228,14 @@ def draw(canvas):
 
     # draw ship and sprites
     my_ship.draw(canvas)
-    a_rock.draw(canvas)
     a_missile.draw(canvas)
     
     # update ship and sprites
     my_ship.update()
-    a_rock.update()
     a_missile.update()
+
+    # draw and update rocks
+    process_sprite_handler(rock_group, canvas)
 
     # draw splash screen if not started
     if not started:
@@ -242,20 +243,31 @@ def draw(canvas):
                           splash_info.get_size(), [WIDTH / 2, HEIGHT / 2], 
                           splash_info.get_size())
 
+
 # timer handler that spawns a rock    
 def rock_spawner():
-    global a_rock
+    global rock_group
     rock_pos = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
     rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
     rock_avel = random.random() * .2 - .1
-    a_rock = Sprite(rock_pos, rock_vel, 0, rock_avel, asteroid_image, asteroid_info)
-            
+    if started and len(rock_group) < 12:
+        a_rock = Sprite(rock_pos, rock_vel, 0, rock_avel, asteroid_image, asteroid_info)
+        rock_group.add(a_rock)
+
+
+def process_sprite_handler(sprites, canvas):
+    for sprite in sprites:
+        sprite.draw(canvas)
+        sprite.update()
+
 # initialize stuff
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, .1, asteroid_image, asteroid_info)
+rock_group = set()
+rock_group.add(a_rock)
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
 
