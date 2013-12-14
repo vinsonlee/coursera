@@ -145,7 +145,13 @@ class Ship:
         missile_pos = [self.pos[0] + self.radius * forward[0], self.pos[1] + self.radius * forward[1]]
         missile_vel = [self.vel[0] + 6 * forward[0], self.vel[1] + 6 * forward[1]]
         a_missile = Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound)
+        missile_group.add(a_missile)
+        
+    def get_position(self):
+        return self.pos
     
+    def get_radius(self):
+        return self.radius
     
     
 # Sprite class
@@ -177,7 +183,27 @@ class Sprite:
         # update position
         self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
         self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
-  
+        
+        # update age
+        self.age += 1
+        
+        if self.age >= self.lifespan:
+            return True
+        else:
+            return False
+    
+    def get_position(self):
+        return self.pos
+    
+    def get_radius(self):
+        return self.radius
+    
+    def collide(self, other_object):
+        d = dist(self.get_position(), other_object.get_position())
+        if d < self.get_radius() + other_object.get_radius():
+            return True
+        else:
+            return False  
         
 # key handlers to control ship   
 def keydown(key):
@@ -209,7 +235,7 @@ def click(pos):
         started = True
 
 def draw(canvas):
-    global time, started
+    global time, started, lives
     
     # animiate background
     time += 1
@@ -228,14 +254,19 @@ def draw(canvas):
 
     # draw ship and sprites
     my_ship.draw(canvas)
-    a_missile.draw(canvas)
+    # a_missile.draw(canvas)
     
     # update ship and sprites
     my_ship.update()
-    a_missile.update()
+    # a_missile.update()
 
     # draw and update rocks
-    process_sprite_handler(rock_group, canvas)
+    process_sprite_group(rock_group, canvas)
+    
+    process_sprite_group(missile_group, canvas)
+    
+    if started and group_collide(rock_group, my_ship):
+        lives -= 1
 
     # draw splash screen if not started
     if not started:
@@ -255,20 +286,27 @@ def rock_spawner():
         rock_group.add(a_rock)
 
 
-def process_sprite_handler(sprites, canvas):
-    for sprite in sprites:
+def process_sprite_group(sprites, canvas):
+    for sprite in set(sprites):
         sprite.draw(canvas)
-        sprite.update()
+        if sprite.update():
+            sprites.remove(sprite)
+        
+        
+def group_collide(group, other_object):
+    for sprite in set(group):
+        if sprite.collide(other_object):
+            group.remove(sprite)
+            return True
+    return False
 
 # initialize stuff
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, .1, asteroid_image, asteroid_info)
 rock_group = set()
-rock_group.add(a_rock)
-a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
+missile_group = set()
 
 
 # register handlers
