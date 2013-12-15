@@ -10,6 +10,7 @@ score = 0
 lives = 3
 time = 0
 started = False
+explosion_group = set()
 
 
 class ImageInfo:
@@ -143,7 +144,6 @@ class Ship:
         self.angle_vel -= .05
 
     def shoot(self):
-        global a_missile
         forward = angle_to_vector(self.angle)
         missile_pos = [self.pos[0] + self.radius * forward[0], self.pos[1] + self.radius * forward[1]]
         missile_vel = [self.vel[0] + 6 * forward[0], self.vel[1] + 6 * forward[1]]
@@ -176,8 +176,14 @@ class Sprite:
             sound.play()
 
     def draw(self, canvas):
-        canvas.draw_image(self.image, self.image_center, self.image_size,
-                          self.pos, self.image_size, self.angle)
+        if self.animated:
+            current_sprite_index = time % self.lifespan
+            current_sprite_center = (self.image_center[0] + current_sprite_index * self.image_size[0], self.image_center[0])
+            canvas.draw_image(self.image, current_sprite_center, self.image_size,
+                              self.pos, self.image_size, self.angle)
+        else:
+            canvas.draw_image(self.image, self.image_center, self.image_size,
+                              self.pos, self.image_size, self.angle)
 
     def update(self):
         # update angle
@@ -282,6 +288,8 @@ def draw(canvas):
         if group_collide(rock_group, my_ship):
             lives -= 1
 
+        process_sprite_group(explosion_group, canvas)
+
         if lives == 0:
             started = False
             rock_group = set()
@@ -289,7 +297,6 @@ def draw(canvas):
 
 # timer handler that spawns a rock
 def rock_spawner():
-    global rock_group
     rock_pos = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
     rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
     rock_avel = random.random() * .2 - .1
@@ -311,6 +318,8 @@ def group_collide(group, other_object):
     for sprite in set(group):
         if sprite.collide(other_object):
             group.remove(sprite)
+            an_explosion = Sprite(sprite.get_position(), [0, 0], 0, 0, explosion_image, explosion_info, explosion_sound)
+            explosion_group.add(an_explosion)
             return True
     return False
 
