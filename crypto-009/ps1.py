@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+
 def strxor(a, b):     # xor two strings of different lengths
     if len(a) > len(b):
         return "".join([chr(ord(x) ^ ord(y)) for (x, y) in zip(a[:len(b)], b)])
     else:
         return "".join([chr(ord(x) ^ ord(y)) for (x, y) in zip(a, b[:len(a)])])
+
 
 def encrypt(key, msg):
     c = strxor(key, msg)
@@ -57,7 +59,8 @@ for i in range(len(ciphertext)):
 #
 # space XORed with character or space will be a character or NUL.
 #
-# If c1 ^ c2 is not in NUL, a-z, or A-Z, then neither m1 nor m2 are space characters.
+# If c1 ^ c2 is not in NUL, a-z, or A-Z, then neither m1 nor m2 are space
+# characters.
 #
 # Initialize all plaintext to be the space character
 # Then set to non-space if we do not think it's a space.
@@ -76,10 +79,6 @@ for i in range(10):
         for k in range(len(s)):
             if not s[k].isalpha() and s[k] != chr(0):
                 plaintext[i][k] = '?'
-                if i == 0 and k == 2 and False:
-                   print i, j, k
-                   print "?", s[k], "?"
-                   assert False
 
 # Print out the plaintexts.
 # We should many of the spaces decoded.
@@ -121,6 +120,7 @@ target_plaintext = strxor(str(key), str(target_ciphertext))
 print "target", target_plaintext
 print
 
+
 # Add guesses to the key here.
 #
 # m ^ k = c
@@ -135,7 +135,8 @@ def set_key(position, character):
     known[position] = True
     for i in range(10):
         if position < len(plaintext[i]):
-            plaintext[i][position] = strxor(chr(ciphertext[i][position]), character)
+            plaintext[i][position] = strxor(chr(ciphertext[i][position]),
+                                            character)
 
 set_key(2, strxor(chr(ciphertext[0][2]), ' '))
 set_key(10, strxor(chr(ciphertext[0][10]), 't'))
@@ -215,7 +216,8 @@ set_key(151, strxor(chr(ciphertext[8][151]), 'i'))
 set_key(152, strxor(chr(ciphertext[8][152]), 'n'))
 set_key(153, strxor(chr(ciphertext[8][153]), 'g'))
 
-# Fix incorrect known keys because there was a non-alpha character somewhere in the column.
+# Fix incorrect known keys because there was a non-alpha character somewhere
+# in the column.
 known[7] = False
 set_key(7, strxor(chr(ciphertext[0][7]), 'f'))
 known[160] = False
@@ -233,28 +235,13 @@ set_key(172, strxor(chr(ciphertext[6][172]), 'u'))
 
 # See changes after guesses.
 for i in range(10):
-     print "plaintext[%s]: %s" % (i, plaintext[i])
+    print "plaintext[%s]: %s" % (i, plaintext[i])
 
 target_plaintext = strxor(str(key), str(target_ciphertext))
 print "target:", target_plaintext
 
-import sys
-
-# Check if we are right by encrypting solved plaintext to see if we get original cyphertext.
+# Check if we are right by encrypting solved plaintext to see if we get
+# original cyphertext.
 for i in range(10):
     c = encrypt(str(key), str(plaintext[i]))
-    #print c.encode('hex')
-    #print str(ciphertext[i]).encode('hex')
-    if c.encode('hex') != str(ciphertext[i]).encode('hex'):
-        print "Incorrect plaintext for ciphertext", i
-        s1 = c.encode('hex')
-        s2 = str(ciphertext[i]).encode('hex')
-        for j in range(len(s1)):
-             assert s1[j] == s2[j]
-        #    x = c.encode('hex')[j]
-        #    y = str(ciphertext[i])[j]
-        #    if x != y:
-        #        print "position %s mismatch: %s %s" % (j, x, y)
-        #        sys.exit()
-    else:
-        print "plaintext %s is correct" % i
+    assert c.encode('hex') == str(ciphertext[i]).encode('hex')
