@@ -1,33 +1,15 @@
 #!/usr/bin/env python
 
-import sys
-
-# str(bytearray(foo.decode('hex'))) == foo.decode('hex')
-
-#MSGS = ( ---  11 secret messages  --- )
-
-MSGS = ('aasuthsathuseahtuaotuashu', 'basuhasteus', 'casthuseau')
-
 def strxor(a, b):     # xor two strings of different lengths
     if len(a) > len(b):
         return "".join([chr(ord(x) ^ ord(y)) for (x, y) in zip(a[:len(b)], b)])
     else:
         return "".join([chr(ord(x) ^ ord(y)) for (x, y) in zip(a, b[:len(a)])])
 
-def random(size=16):
-    return open("/dev/urandom").read(size)
-
 def encrypt(key, msg):
     c = strxor(key, msg)
-    print c.encode('hex')
+    # print c.encode('hex')
     return c
-
-def main():
-    key = random(1024)
-    ciphertexts = [encrypt(key, msg) for msg in MSGS]
-
-
-#main()
 
 ciphertext = [''] * 10
 
@@ -53,13 +35,13 @@ ciphertext[9] = bytearray('466d06ece998b7a2fb1d464fed2ced7641ddaa3cc31c9941cf110
 
 target_ciphertext = bytearray('32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904'.decode('hex'))
 
-key = bytearray('?' * 1024)
+key = bytearray(' ' * 1024)
 
 plaintext = [''] * len(ciphertext)
 for i in range(len(ciphertext)):
     plaintext[i] = bytearray(len(ciphertext[i]))
 
-# xor all the strings against each other and look for space characters
+# XOR each ciphertext to look for space characters.
 #
 # space = '0x20'
 # 0x20 ^ ' ' = 0x0
@@ -76,21 +58,16 @@ for i in range(len(ciphertext)):
 # space XORed with character or space will be a character or NUL.
 #
 # If c1 ^ c2 is not in NUL, a-z, or A-Z, then neither m1 nor m2 are space characters.
-
+#
 # Initialize all plaintext to be the space character
+# Then set to non-space if we do not think it's a space.
 plaintext = [''] * len(ciphertext)
 for i in range(len(ciphertext)):
     plaintext[i] = bytearray(' ' * len(ciphertext[i]))
 
-print 'A'
-
 for i in range(10):
-    print len(str(ciphertext[i]))
-
-print 'B'
-for i in range(len(ciphertext)):
-    print i
-    for j in range(len(ciphertext)):
+    for j in range(10):
+        # Do not check XOR with itself.
         if (i == j):
             continue
 
@@ -99,103 +76,185 @@ for i in range(len(ciphertext)):
         for k in range(len(s)):
             if not s[k].isalpha() and s[k] != chr(0):
                 plaintext[i][k] = '?'
-
-print 'C'
+                if i == 0 and k == 2 and False:
+                   print i, j, k
+                   print "?", s[k], "?"
+                   assert False
 
 # Print out the plaintexts.
-# Should have the spaces decoded.
+# We should many of the spaces decoded.
 for i in range(10):
     print "plaintext[%s]: %s" % (i, str(plaintext[i]))
 
-#sys.exit()
+print
 
-print str(plaintext[0])
-print str(plaintext[0][0])
-print str(plaintext[0][1])
-print str(plaintext[0][5]), chr(plaintext[0][5])
-print str(plaintext[0][6]), plaintext[0][6]
-assert chr(plaintext[0][5]) == '?'
-assert chr(plaintext[0][6]) == ' '
-
-print "key"
-print key
-
-# Go through all the plaintexts and get the key value for message that have space.
+# Go through all the plaintexts.
+# For each space we figure out what the key is.
+#
+# k = c ^ m = c ^ space
+known = [False] * 1024
 for i in range(10):
     for j in range(len(plaintext[i])):
         if chr(plaintext[i][j]) == ' ':
             c = strxor(chr(ciphertext[i][j]), ' ')
             key[j] = c
+            known[j] = True
 
-print "key"
-print key
+# Decrypt with the assummed known pieces of the key
+# c = k ^ m
+# m = c ^ k
+# Print out plaintexts
+#for i in range(10):
+#    print "plaintext[%s]: %s" % (i, strxor(str(key), str(ciphertext[i])))
+for i in range(1024):
+    if known[i]:
+        for j in range(10):
+            if i < len(plaintext[j]):
+                #print i, j
+                plaintext[j][i] = strxor(chr(ciphertext[j][i]), chr(key[i]))
 
 for i in range(10):
-    s = strxor(str(key), str(ciphertext[i]))
+    print "plaintext[%s]: %s" % (i, str(plaintext[i]))
+print
+print
+target_plaintext = strxor(str(key), str(target_ciphertext))
+print "target", target_plaintext
+print
 
 # Add guesses to the key here.
 #
 # m ^ k = c
 # k = c ^ m
-key[10] = strxor(chr(ciphertext[0][10]), 't')
-key[14] = strxor(chr(ciphertext[0][14]), 't')
-key[18] = strxor(chr(ciphertext[0][18]), 'n')
+#
+# Guess the key by guessing the message based on common English patterns.
 
-key[2] = strxor(chr(ciphertext[2][2]), 'e')
+# Update the key and update the plaintext.
+def set_key(position, character):
+    key[position] = character
+    assert known[position] is False
+    known[position] = True
+    for i in range(10):
+        if position < len(plaintext[i]):
+            plaintext[i][position] = strxor(chr(ciphertext[i][position]), character)
 
-key[35] = strxor(chr(ciphertext[3][35]), 'n')
-key[36] = strxor(chr(ciphertext[3][36]), 'c')
-key[38] = strxor(chr(ciphertext[3][38]), 'y')
-key[39] = strxor(chr(ciphertext[3][39]), 'p')
-key[40] = strxor(chr(ciphertext[3][40]), 't')
-key[41] = strxor(chr(ciphertext[3][41]), 'i')
-key[42] = strxor(chr(ciphertext[3][42]), 'o')
-key[50] = strxor(chr(ciphertext[3][50]), 'i')
-key[81] = strxor(chr(ciphertext[3][81]), 't')
+set_key(2, strxor(chr(ciphertext[0][2]), ' '))
+set_key(10, strxor(chr(ciphertext[0][10]), 't'))
+set_key(14, strxor(chr(ciphertext[0][14]), 't'))
+set_key(18, strxor(chr(ciphertext[0][18]), 'n'))
+set_key(128, strxor(chr(ciphertext[0][128]), 'b'))
 
-key[101] = strxor(chr(ciphertext[3][101]), 'n')
-key[102] = strxor(chr(ciphertext[3][102]), 'g')
-key[103] = strxor(chr(ciphertext[3][103]), ' ')
-key[109] = strxor(chr(ciphertext[3][109]), 'p')
-key[110] = strxor(chr(ciphertext[3][110]), 't')
-key[113] = strxor(chr(ciphertext[3][113]), 'n')
-key[115] = strxor(chr(ciphertext[3][115]), 'a')
-key[118] = strxor(chr(ciphertext[3][118]), 'o')
-key[119] = strxor(chr(ciphertext[3][119]), 'r')
-key[122] = strxor(chr(ciphertext[3][122]), 'h')
-key[124] = strxor(chr(ciphertext[3][124]), ' ')
+set_key(35, strxor(chr(ciphertext[3][35]), 'n'))
+set_key(36, strxor(chr(ciphertext[3][36]), 'c'))
+set_key(39, strxor(chr(ciphertext[3][39]), 'p'))
+set_key(40, strxor(chr(ciphertext[3][40]), 't'))
+set_key(41, strxor(chr(ciphertext[3][41]), 'i'))
+set_key(42, strxor(chr(ciphertext[3][42]), 'o'))
+set_key(50, strxor(chr(ciphertext[3][50]), 'i'))
+set_key(81, strxor(chr(ciphertext[3][81]), 't'))
 
-key[54] = strxor(chr(ciphertext[4][54]), ' ')
-key[56] = strxor(chr(ciphertext[4][56]), 'p')
+set_key(101, strxor(chr(ciphertext[3][101]), 'n'))
+set_key(102, strxor(chr(ciphertext[3][102]), 'g'))
+set_key(103, strxor(chr(ciphertext[3][103]), ' '))
+set_key(109, strxor(chr(ciphertext[3][109]), 'p'))
+set_key(110, strxor(chr(ciphertext[3][110]), 't'))
+set_key(113, strxor(chr(ciphertext[3][113]), 'n'))
+set_key(115, strxor(chr(ciphertext[3][115]), 'a'))
+set_key(118, strxor(chr(ciphertext[3][118]), 'o'))
+set_key(119, strxor(chr(ciphertext[3][119]), 'r'))
+set_key(122, strxor(chr(ciphertext[3][122]), 'h'))
+set_key(124, strxor(chr(ciphertext[3][124]), ' '))
 
-key[7] = strxor(chr(ciphertext[5][7]), 'r')
-key[30] = strxor(chr(ciphertext[5][30]), 'r')
-key[31] = strxor(chr(ciphertext[5][31]), 'a')
-key[32] = strxor(chr(ciphertext[5][32]), 'p')
-key[33] = strxor(chr(ciphertext[5][33]), 'h')
-key[34] = strxor(chr(ciphertext[5][34]), 'y')
-key[86] = strxor(chr(ciphertext[5][86]), 'l')
-key[92] = strxor(chr(ciphertext[5][92]), 't')
-key[93] = strxor(chr(ciphertext[5][93]), 'e')
-key[94] = strxor(chr(ciphertext[5][94]), 'r')
-key[99] = strxor(chr(ciphertext[5][99]), 'd')
-key[125] = strxor(chr(ciphertext[5][125]), 'r')
-key[131] = strxor(chr(ciphertext[5][131]), 'a')
+set_key(54, strxor(chr(ciphertext[4][54]), ' '))
+set_key(56, strxor(chr(ciphertext[4][56]), 'p'))
 
-key[82] = strxor(chr(ciphertext[6][82]), 'r')
-key[83] = strxor(chr(ciphertext[6][83]), 'c')
-key[84] = strxor(chr(ciphertext[6][84]), 'e')
+set_key(30, strxor(chr(ciphertext[5][30]), 'r'))
+set_key(31, strxor(chr(ciphertext[5][31]), 'a'))
+set_key(32, strxor(chr(ciphertext[5][32]), 'p'))
+set_key(33, strxor(chr(ciphertext[5][33]), 'h'))
+set_key(34, strxor(chr(ciphertext[5][34]), 'y'))
+set_key(86, strxor(chr(ciphertext[5][86]), 'l'))
+set_key(92, strxor(chr(ciphertext[5][92]), 't'))
+set_key(93, strxor(chr(ciphertext[5][93]), 'e'))
+set_key(94, strxor(chr(ciphertext[5][94]), 'r'))
+set_key(99, strxor(chr(ciphertext[5][99]), 'd'))
+set_key(125, strxor(chr(ciphertext[5][125]), 'r'))
+set_key(131, strxor(chr(ciphertext[5][131]), 'a'))
 
-key[95] = strxor(chr(ciphertext[7][95]), 'r')
+set_key(82, strxor(chr(ciphertext[6][82]), 'r'))
+set_key(83, strxor(chr(ciphertext[6][83]), 'c'))
+set_key(84, strxor(chr(ciphertext[6][84]), 'e'))
+set_key(135, strxor(chr(ciphertext[6][135]), 'r'))
+set_key(137, strxor(chr(ciphertext[6][137]), 'm'))
+set_key(138, strxor(chr(ciphertext[6][138]), 'e'))
+set_key(140, strxor(chr(ciphertext[6][140]), 't'))
+set_key(155, strxor(chr(ciphertext[6][155]), 'f'))
+set_key(158, strxor(chr(ciphertext[6][158]), 'c'))
+set_key(159, strxor(chr(ciphertext[6][159]), 'e'))
+set_key(161, strxor(chr(ciphertext[6][161]), 't'))
+set_key(162, strxor(chr(ciphertext[6][162]), 'o'))
+set_key(164, strxor(chr(ciphertext[6][164]), 'b'))
+set_key(165, strxor(chr(ciphertext[6][165]), 'r'))
+set_key(166, strxor(chr(ciphertext[6][166]), 'e'))
+set_key(167, strxor(chr(ciphertext[6][167]), 'a'))
+set_key(168, strxor(chr(ciphertext[6][168]), 'k'))
+set_key(170, strxor(chr(ciphertext[6][170]), 'y'))
+set_key(171, strxor(chr(ciphertext[6][171]), 'o'))
 
-key[25] = strxor(chr(ciphertext[8][25]), 'o')
-key[26] = strxor(chr(ciphertext[8][26]), 'n')
+set_key(95, strxor(chr(ciphertext[7][95]), 'r'))
 
-print "key"
-print key
+set_key(25, strxor(chr(ciphertext[8][25]), 'o'))
+set_key(26, strxor(chr(ciphertext[8][26]), 'n'))
+set_key(136, strxor(chr(ciphertext[8][136]), 'u'))
+set_key(142, strxor(chr(ciphertext[8][142]), 'r'))
+set_key(145, strxor(chr(ciphertext[8][145]), 'e'))
+set_key(146, strxor(chr(ciphertext[8][146]), 'c'))
+set_key(147, strxor(chr(ciphertext[8][147]), 'r'))
+set_key(149, strxor(chr(ciphertext[8][149]), 'p'))
+set_key(150, strxor(chr(ciphertext[8][150]), 't'))
+set_key(151, strxor(chr(ciphertext[8][151]), 'i'))
+set_key(152, strxor(chr(ciphertext[8][152]), 'n'))
+set_key(153, strxor(chr(ciphertext[8][153]), 'g'))
 
-# See changes.
+# Fix incorrect known keys because there was a non-alpha character somewhere in the column.
+known[7] = False
+set_key(7, strxor(chr(ciphertext[0][7]), 'f'))
+known[160] = False
+set_key(160, strxor(chr(ciphertext[6][160]), ' '))
+known[144] = False
+set_key(144, strxor(chr(ciphertext[6][144]), ' '))
+known[154] = False
+set_key(154, strxor(chr(ciphertext[6][154]), ' '))
+known[156] = False
+set_key(156, strxor(chr(ciphertext[6][156]), 'o'))
+known[157] = False
+set_key(157, strxor(chr(ciphertext[6][157]), 'r'))
+known[172] = False
+set_key(172, strxor(chr(ciphertext[6][172]), 'u'))
+
+# See changes after guesses.
 for i in range(10):
-    print i, strxor(str(key), str(ciphertext[i]))
+     print "plaintext[%s]: %s" % (i, plaintext[i])
 
-print "target", strxor(str(key), str(target_ciphertext))
+target_plaintext = strxor(str(key), str(target_ciphertext))
+print "target:", target_plaintext
+
+import sys
+
+# Check if we are right by encrypting solved plaintext to see if we get original cyphertext.
+for i in range(10):
+    c = encrypt(str(key), str(plaintext[i]))
+    #print c.encode('hex')
+    #print str(ciphertext[i]).encode('hex')
+    if c.encode('hex') != str(ciphertext[i]).encode('hex'):
+        print "Incorrect plaintext for ciphertext", i
+        s1 = c.encode('hex')
+        s2 = str(ciphertext[i]).encode('hex')
+        for j in range(len(s1)):
+             assert s1[j] == s2[j]
+        #    x = c.encode('hex')[j]
+        #    y = str(ciphertext[i])[j]
+        #    if x != y:
+        #        print "position %s mismatch: %s %s" % (j, x, y)
+        #        sys.exit()
+    else:
+        print "plaintext %s is correct" % i
