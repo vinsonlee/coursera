@@ -15,13 +15,30 @@ iv = '000102030405060708090A0B0C0D0E0F'
 message = '6bc1bee22e409f96e93d7e117393172a'
 ciphertext = '7649abac8119b246cee98e9b12e9197d'
 
-obj = AES.new(binascii.unhexlify(key), AES.MODE_CBC, unhexlify(iv))
+obj = AES.new(unhexlify(key), AES.MODE_CBC, unhexlify(iv))
 c = obj.encrypt(unhexlify(message))
 assert hexlify(c) == ciphertext
 
 obj = AES.new(unhexlify(key), AES.MODE_CBC, unhexlify(iv))
 m = obj.decrypt(unhexlify(ciphertext))
 assert hexlify(m) == message
+
+# CTR
+key = '2b7e151628aed2a6abf7158809cf4f3c'
+iv = 'f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff'
+message = '6bc1bee22e409f96e93d7e117393172a'
+ciphertext = '874d6191b620e3261bef6864990db6ce'
+
+ctr = Counter.new(128, initial_value=int(iv, 16))
+obj = AES.new(unhexlify(key), AES.MODE_CTR, unhexlify(iv), counter=ctr)
+c = obj.encrypt(unhexlify(message))
+assert hexlify(c) == ciphertext
+
+ctr = Counter.new(128, initial_value=int(iv, 16))
+obj = AES.new(unhexlify(key), AES.MODE_CTR, unhexlify(iv), counter=ctr)
+m = obj.decrypt(unhexlify(ciphertext))
+assert hexlify(m) == message
+
 
 # Question 1
 # CBC
@@ -51,23 +68,63 @@ iv4 = ciphertext4[0:32]
 ciphertext4 = ciphertext4[32:]
 
 
+# http://stackoverflow.com/questions/12524994/encrypt-decrypt-using-pycrypto-aes-256
+def pkcs5_unpad(s):
+    s = s[0:-ord(s[-1])]
+    return s
+
+
+def pkcs5_pad(s):
+    BLOCK_SIZE = 16
+    return s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
+
+print 'PyCrypto'
+
+# Decryption
 obj1 = AES.new(unhexlify(key1), AES.MODE_CBC, unhexlify(iv1))
-m1 = obj1.decrypt(unhexlify(ciphertext1))
-print "Message 1:", m1
+message1 = obj1.decrypt(unhexlify(ciphertext1))
+foo1 = message1
+assert pkcs5_pad(pkcs5_unpad(message1)) == message1
+message1 = pkcs5_unpad(message1)
+print 'Message 1:', message1
+assert message1 == 'Basic CBC mode encryption needs padding.'
 
 obj2 = AES.new(unhexlify(key2), AES.MODE_CBC, unhexlify(iv2))
-m2 = obj2.decrypt(unhexlify(ciphertext2))
-print "Message 2:", m2
+message2 = obj2.decrypt(unhexlify(ciphertext2))
+message2 = pkcs5_unpad(message2)
+print 'Message 2:', message2
+assert message2 == 'Our implementation uses rand. IV'
 
 ctr3 = Counter.new(128, initial_value=int(iv3, 16))
 obj3 = AES.new(unhexlify(key3), AES.MODE_CTR, unhexlify(iv3), counter=ctr3)
-m3 = obj3.decrypt(unhexlify(ciphertext3))
-print "Message 3:", m3
+message3 = obj3.decrypt(unhexlify(ciphertext3))
+print 'Message 3:', message3
 
 ctr4 = Counter.new(128, initial_value=int(iv4, 16))
 obj4 = AES.new(unhexlify(key4), AES.MODE_CTR, unhexlify(iv4), counter=ctr4)
-m4 = obj4.decrypt(unhexlify(ciphertext4))
-print "Message 4:", m4
+message4 = obj4.decrypt(unhexlify(ciphertext4))
+print "Message 4:", message4
+
+# Encryption
+obj1 = AES.new(unhexlify(key1), AES.MODE_CBC, unhexlify(iv1))
+message1 = pkcs5_pad(message1)
+c1 = obj1.encrypt(message1)
+assert hexlify(c1) == ciphertext1
+
+obj2 = AES.new(unhexlify(key2), AES.MODE_CBC, unhexlify(iv2))
+message2 = pkcs5_pad(message2)
+c2 = obj2.encrypt(message2)
+assert hexlify(c2) == ciphertext2
+
+ctr3 = Counter.new(128, initial_value=int(iv3, 16))
+obj3 = AES.new(unhexlify(key3), AES.MODE_CTR, unhexlify(iv3), counter=ctr3)
+c3 = obj3.encrypt(message3)
+assert hexlify(c3) == ciphertext3
+
+ctr4 = Counter.new(128, initial_value=int(iv4, 16))
+obj4 = AES.new(unhexlify(key4), AES.MODE_CTR, unhexlify(iv4), counter=ctr4)
+c4 = obj4.encrypt(message4)
+assert hexlify(c4) == ciphertext4
 
 
 def aes_cbc_decrypt(key, iv, ciphertext):
@@ -98,6 +155,8 @@ def aes_cbc_encrypt(key, iv, message):
     return
 
 
+print 'Own implementation'
+
 message = aes_cbc_decrypt(unhexlify(key1), unhexlify(iv1), unhexlify(ciphertext1))
 print message
 
@@ -105,5 +164,5 @@ message = aes_cbc_decrypt(unhexlify(key2), unhexlify(iv2), unhexlify(ciphertext2
 print message
 
 message = 'Basic CBC mode encryption needs padding.'
-print len(message)
+#print len(message)
 #ciphertext = aes_cbc_encrypt(unhexlify(key1), unhexlify(iv1), unhexlify(m1))
