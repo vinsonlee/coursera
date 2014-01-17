@@ -68,3 +68,42 @@ ctr4 = Counter.new(128, initial_value=int(iv4, 16))
 obj4 = AES.new(unhexlify(key4), AES.MODE_CTR, unhexlify(iv4), counter=ctr4)
 m4 = obj4.decrypt(unhexlify(ciphertext4))
 print "Message 4:", m4
+
+
+def aes_cbc_decrypt(key, iv, ciphertext):
+    key_length = len(key)
+    ciphertext_length = len(ciphertext)
+    iv_length = len(iv)
+    block_size = 16  # 128 bits
+
+    assert key_length == 16
+    assert ciphertext_length % block_size == 0
+
+    num_blocks = ciphertext_length / block_size
+    message = ''
+
+    for i in range(num_blocks):
+        c = ciphertext[(i * block_size):((i + 1) * block_size)]
+        k = key
+        obj = AES.new(k, AES.MODE_CBC, iv)
+        m = obj.decrypt(c)
+        message += m
+        iv = c
+
+    return message
+
+
+def aes_cbc_encrypt(key, iv, message):
+    ciphertext = ''
+    return
+
+
+message = aes_cbc_decrypt(unhexlify(key1), unhexlify(iv1), unhexlify(ciphertext1))
+print message
+
+message = aes_cbc_decrypt(unhexlify(key2), unhexlify(iv2), unhexlify(ciphertext2))
+print message
+
+message = 'Basic CBC mode encryption needs padding.'
+print len(message)
+#ciphertext = aes_cbc_encrypt(unhexlify(key1), unhexlify(iv1), unhexlify(m1))
