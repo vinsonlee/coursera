@@ -14,6 +14,8 @@ public class Percolation {
             opened[i] = false;
         }
         
+        opened[0] = true;
+        
         // 0 is the virtual top site
         // N*N+1 is the vitual bottom site
         uf = new WeightedQuickUnionUF(N*N + 2);
@@ -45,6 +47,11 @@ public class Percolation {
             }
             
             opened[pid(i, j)] = true;
+            
+            // open the bottom virtual site if it's a bottom site
+            if (i == N) {
+                opened[N*N + 1] = true;
+            }
         }
     }
 
@@ -68,7 +75,7 @@ public class Percolation {
     
     // does the system percolate?
     public boolean percolates() {
-        return uf.connected(0, N*N+1);
+        return opened[N*N + 1] && uf.connected(0, N*N+1);
     }
     
     /*

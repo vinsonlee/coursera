@@ -4,6 +4,10 @@ public class PercolationStats {
 
     // perform T independent computational experiments on an N-by-N grid
     public PercolationStats(int N, int T) {
+        if (N <= 0 || T <= 0) {
+            throw new IllegalArgumentException();
+        }
+        
         this.T = T;
         this.results = new double[T];
         
@@ -56,6 +60,10 @@ public class PercolationStats {
     public static void main(String[] args)   {
         int N = Integer.parseInt(args[0]);
         int T = Integer.parseInt(args[1]);
+        
+        if (N <= 0 || T <= 0) {
+            throw new IllegalArgumentException();
+        }
         
         PercolationStats stats = new PercolationStats(N, T);
         StdOut.println("mean = " + stats.mean());
