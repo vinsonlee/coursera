@@ -14,7 +14,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         last = 0;
         N = 0;
     }
-    
+
     // is the queue empty?
     public boolean isEmpty() {
         return N == 0;
@@ -59,7 +59,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         N++;
     }
-    
+
     // delete and return a random item
     public Item dequeue() {
         if (isEmpty()) {
@@ -82,7 +82,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         return item;
     }
-    
+
     // return (but do not delete) a random item
     public Item sample() {
         if (isEmpty()) {
@@ -99,7 +99,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         return item;
     }
-    
+
     // return an independent iterator over items in random order
     public Iterator<Item> iterator() {
         return new ArrayIterator();
@@ -145,7 +145,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
     }
 
-    
     // unit testing
     public static void main(String[] args) {
         RandomizedQueue<Integer> q;

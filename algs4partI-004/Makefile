@@ -1,3 +1,10 @@
+percolation: Percolation.java PercolationStats.java
+	checkstyle-algs4
+	javac-algs4 $^
+	zip percolation.zip $^
+	java-algs4 PercolationStats 200 100
+	java-algs4 PercolationStats 2 10000
+
 queues: Deque.java RandomizedQueue.java Subset.java
 	checkstyle-algs4 $^
 	javac-algs4 $^
