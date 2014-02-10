@@ -23,7 +23,7 @@ public class Deque<Item> implements Iterable<Item> {
     
     // is the deque empty?
     public boolean isEmpty() {
-        return first == last;
+        return N == 0;
     }
     
     // return the number of items on the deque
@@ -34,22 +34,36 @@ public class Deque<Item> implements Iterable<Item> {
     // insert the item at the front
     public void addFirst(Item item) {
         Node oldfirst = first;
+
         first = new Node();
         first.item = item;
         first.prev = null;
         first.next = oldfirst;
-        oldfirst.prev = first;
+
+        if (isEmpty()) {
+            last = first;
+        } else {
+            oldfirst.prev = first;
+        }
+
         N++;
     }
     
     // insert the item at the end
     public void addLast(Item item) {
         Node oldlast = last;
+
         last = new Node();
         last.item = item;
         last.next = null;
         last.prev = oldlast;
-        oldlast.next = last;
+
+        if (isEmpty()) {
+            first = last;
+        } else {
+            oldlast.next = last;
+        }
+
         N++;
     }
     
@@ -72,7 +86,36 @@ public class Deque<Item> implements Iterable<Item> {
         N--;
         return item;
     }
-    
+
+    /**
+     * Returns a string representation of this queue.
+     * @return the sequence of items in FIFO order, separated by spaces
+     */
+    /*
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for (Item item : this)
+            s.append(item + " ");
+        return s.toString();
+    }
+     */
+
+    // check internal invariants
+    private boolean check() {
+        if (N == 0) {
+            if (first != null) {
+                return false;
+            }
+            if (last  != null) {
+                return false;
+            }
+        } else if (N == 1) {
+            /* empty */
+            return true;
+        }
+        return true;
+    }
+
     // return an iterator over items in order from front to end
     public Iterator<Item> iterator() {
         return new ListIterator();
@@ -98,7 +141,21 @@ public class Deque<Item> implements Iterable<Item> {
     
     // unit testing
     public static void main(String[] args) {
-        
+        Deque<Integer> q;
+
+        // Calls to addLast()
+        q = new Deque<Integer>();
+        for (int i = 0; i < 5; i++) {
+            q.addLast(i);
+        }
+        //StdOut.println(q);
+
+        // Calls to addFirst()
+        q = new Deque<Integer>();
+        for (int i = 0; i < 5; i++) {
+            q.addFirst(i);
+        }
+        //StdOut.println(q);
     }
-    
+
 }
