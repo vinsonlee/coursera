@@ -1,6 +1,7 @@
 // http://algs4.cs.princeton.edu/13stacks/LinkedQueue.java.html
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class Deque<Item> implements Iterable<Item> {
     private int N;
@@ -69,21 +70,39 @@ public class Deque<Item> implements Iterable<Item> {
     
     // delete and return the item at the front
     public Item removeFirst() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+
         Item item = first.item;
         first = first.next;
-        first.prev = null;
         N--;
+
+        if (isEmpty()) {
+            last = null;
+        } else {
+            first.prev = null;
+        }
+
         return item;
     }
     
     // delete and return the item at the end
     public Item removeLast() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+
         Item item = last.item;
-        
         last = last.prev;
-        last.next = null;
-        
         N--;
+
+        if (isEmpty()) {
+            first = null;
+        } else {
+            last.next = null;
+        }
+        
         return item;
     }
 
@@ -105,8 +124,7 @@ public class Deque<Item> implements Iterable<Item> {
         if (N == 0) {
             if (first != null) {
                 return false;
-            }
-            if (last  != null) {
+            } else if (last  != null) {
                 return false;
             }
         } else if (N == 1) {
