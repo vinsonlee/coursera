@@ -14,3 +14,8 @@ queues: Deque.java RandomizedQueue.java Subset.java
 	echo "A B C D E F G H I" | java-algs4 Subset 3
 	echo "A B C D E F G H I" | java-algs4 Subset 3
 	echo "AA BB BB BB BB BB CC CC " | java-algs4 Subset 8
+
+collinear: Point.java Brute.java Fast.java
+	checkstyle-algs4 $^
+	javac-algs4 $^
+	zip collinear.zip $^
