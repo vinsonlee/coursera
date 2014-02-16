@@ -101,3 +101,11 @@ assert (e * d) % phi == 1
 # decrypt m = c^d in Zn
 m = gmpy2.powmod(c, d, N)
 assert gmpy2.powmod(m, e, N) == c
+
+hexstring = format(m, 'x')
+hexstring = hexstring.split('00')[1]
+plaintext = hexstring.decode('hex')
+
+print plaintext
+# correct answer
+assert plaintext == 'Factoring lets us break RSA.'
