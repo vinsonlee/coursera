@@ -19,3 +19,4 @@ collinear: Point.java Brute.java Fast.java
 	checkstyle-algs4 $^
 	javac-algs4 $^
 	zip collinear.zip $^
+	java-algs4 -enableassertions Point
