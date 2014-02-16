@@ -49,50 +49,32 @@ print p
 assert p == 25464796146996183438008816563973942229341454268524157846328581927885777969985222835143851073249573454107384461557193173304497244814071505790566593206419759
 
 
-sys.exit()
-
 print 'Question 3'
 # hint: make A an integer
 # https://class.coursera.org/crypto-009/forum/thread?thread_id=828
 
-# 6p ---- 2A ------ 4q
-# Let 6p = 2A - x
-# Let 4q = 2A + x
-# Let 2A = (6p + 4q) / 2 = (2 * (3p+2q))/2
+# sqrt(6*N) close to 3p+2q / 2
+# A = (3p+2q)/2
+# A is not an integer. p,q are prime, then 3p+2q is odd and (3p+2q) is not an integer
+# 2A is an integer
 
-# 24N = 24*pq = 6*4*p*q = 6p*4q = (2A-x)(2A+x) = (2A)^2 - x^2
+# 6p ---- 2A ------ 4q
+# 6p = 2A - x
+# 4q = 2A + x
+# Let 2A = (6p + 4q) / 2
+# 2A = ceil(sqrt(24N))
+
+# N = pq = (2A-x)/6 * (2A-x)/4 = ((2A)^2 - x^2)/24
+# 24N = (2A)^2 - x^2
 # x = sqrt((2A)^2 - 24N)
 
-# sqrt(6*N) is close to (3p + 2q) / 2
-# ceil(sqrt(6*N)) = 2A
-
 N = gmpy2.mpz(720062263747350425279564435525583738338084451473999841826653057981916355690188337790423408664187663938485175264994017897083524079135686877441155132015188279331812309091996246361896836573643119174094961348524639707885238799396839230364676670221627018353299443241192173812729276147530748597302192751375739387929)
-twoA = gmpy2.isqrt(6*N) + 1
-x = gmpy2.isqrt(24 * N - twoA * twoA)
+twoA = gmpy2.isqrt(24*N) + 1
+x = gmpy2.isqrt(twoA * twoA - 24 * N)
 p = (twoA - x) / 6
 q = (twoA + x) / 4
-
-print p
-print q
-print p * q
-print N
-
-assert False
-
-for i in range(2**20):
-    twoA = gmpy2.isqrt(6*N) + i
-    x = gmpy2.isqrt(twoA * twoA - 24*N)
-
-print 'p'
-print p
-print 'q'
-print q
-print 'p*q'
-print p * q
-print 'N'
-print N
-
-
 assert p * q == N
 
-# print p
+print p
+# correct answer
+assert p == 21909849592475533092273988531583955898982176093344929030099423584127212078126150044721102570957812665127475051465088833555993294644190955293613411658629209
