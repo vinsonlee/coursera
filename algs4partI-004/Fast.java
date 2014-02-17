@@ -25,11 +25,6 @@ public class Fast {
 
         // natually sort array
         Arrays.sort(points);
-        /*
-        for (int i = 0; i < N; i++) {
-            StdOut.println(points[i]);
-        }
-         */
 
         for (int i = 0; i < N; i++) {
             // Think of p as origin
@@ -43,18 +38,16 @@ public class Fast {
             // Check if any 3 (or more) adjacent points in the sorted order
             // have equal slopes with respect to p. If so, these points,
             // together with p, are collinear.
-            /*
-            for (int j = 0; j < N; j++) {
-                StdOut.print(pointsBySlope[j]);
-                StdOut.print(p.slopeTo(pointsBySlope[j]) + " ");
-            }
-            StdOut.println();
-             */
 
-            for (int j = 1; j < N-1; j++) {
+            // There can be multiple segments for each point.
+
+            int j = 1;
+            while (j < N - 1) {
                 double slope = p.slopeTo(pointsBySlope[j]);
+
                 if (slope == p.slopeTo(pointsBySlope[j+1])) {
-                    // found the segment
+                    // Found the start of a segment.
+                    // Now look for the end of the segment.
                     int start = j;
                     int end = j+1;
                     for (int k = j+1; k < N; k++) {
@@ -65,12 +58,10 @@ public class Fast {
                         }
                     }
 
-                    //StdOut.println(start + " " + end);
-                    // check if the segment is long enough
-                    // check if it is not a subsegment
+                    // A segment must be 4 or more points.
+                    // A segment must not be a subsegment.
                     if ((end - start >= 2)
                         && (p.compareTo(pointsBySlope[start]) == -1)) {
-                        //StdOut.println("segment!");
                         StdOut.print(p);
                         for (int l = start; l <= end; l++) {
                             StdOut.print(" -> " + pointsBySlope[l]);
@@ -79,7 +70,9 @@ public class Fast {
                         p.drawTo(pointsBySlope[end]);
                     }
 
-                    break;
+                    j = end + 1;
+                } else {
+                    j++;
                 }
             }
         }
