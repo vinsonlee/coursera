@@ -9,11 +9,11 @@ public class Brute {
         In in = new In(args[0]);
         int N = in.readInt();
         Point[] points = new Point[N];
-        boolean[] draw = new boolean[N]; // which points to draw
         for (int i = 0; i < N; i++) {
             int x = in.readInt();
             int y = in.readInt();
             points[i] = new Point(x, y);
+            points[i].draw();
         }
 
         for (int i = 0; i < points.length; i++) {
@@ -56,21 +56,10 @@ public class Brute {
                         }
 
                         StdOut.println(p + " -> " + q + " -> " + r + " -> " + s);
-                        draw[i] = true;
-                        draw[j] = true;
-                        draw[k] = true;
-                        draw[l] = true;
                         p.drawTo(s);
                     }
                 }
             }
-        }
-
-        for (int i = 0; i < draw.length; i++) {
-            if (draw[i]) {
-                points[i].draw();
-            }
-            // StdOut.println(points[i]);
         }
 
         // display to screen all at once
