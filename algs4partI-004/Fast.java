@@ -61,7 +61,7 @@ public class Fast {
                     // A segment must be 4 or more points.
                     // A segment must not be a subsegment.
                     if ((end - start >= 2)
-                        && (p.compareTo(pointsBySlope[start]) == -1)) {
+                        && (p.compareTo(pointsBySlope[start]) < 0)) {
                         StdOut.print(p);
                         for (int l = start; l <= end; l++) {
                             StdOut.print(" -> " + pointsBySlope[l]);
