@@ -64,12 +64,12 @@ public class Board {
     public boolean isGoal() {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if (i == N - 1 && j == N - 1) {
-                    if (tiles[i][j] != 0) {
-                        return false;
-                    } else if (tiles[i][j] != i * N + j + 1) {
+                if (tiles[i][j] == 0) {
+                    if (i != N - 1 && j != N - 1) {
                         return false;
                     }
+                } else if (tiles[i][j] != i * N + j + 1) {
+                    return false;
                 }
             }
         }
@@ -78,7 +78,22 @@ public class Board {
 
     // a board obtained by exchanging two adjacent blocks in the same row
     public Board twin() {
-        return null;
+        // return the first possible twin
+        Board twin = new Board(tiles);
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N - 1; j++) {
+                if (tiles[i][j] != 0 && tiles[i][j+1] != 0) {
+                    twin.tiles[i][j] = tiles[i][j+1];
+                    twin.tiles[i][j+1] = tiles[i][j];
+
+                    return twin;
+                }
+            }
+        }
+
+        assert false;
+        return twin;
     }
 
     // does this board equal y?
@@ -195,10 +210,21 @@ public class Board {
         // StdOut.println(initial.manhattan());
 
         StdOut.println(initial);
+
+        StdOut.println("isGoal");
+        StdOut.println(initial.isGoal());
+
+        /*
+        StdOut.println("twin");
+        StdOut.println(initial.twin());
+         */
+
+        /*
         StdOut.println("neighbors");
         for (Board board : initial.neighbors()) {
             StdOut.println(board);
         }
-    }
+         */
 
+    }
 }
