@@ -10,7 +10,7 @@ public class Board {
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                blocks[i][j] = tiles[i][j];
+                tiles[i][j] = blocks[i][j];
             }
         }
     }
