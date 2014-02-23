@@ -114,7 +114,58 @@ public class Board {
 
     // all neighboring boards
     public Iterable<Board> neighbors()  {
-        return null;
+        int emptyi = -1;
+        int emptyj = -1;
+
+        // find empty tile
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (tiles[i][j] == 0) {
+                    emptyi = i;
+                    emptyj = j;
+                    break;
+                }
+            }
+        }
+
+        assert emptyi != -1;
+        assert emptyj != -1;
+
+        Queue<Board> neighbors = new Queue<Board>();
+
+        // swap with left
+        if (emptyi - 1 >= 0) {
+            Board neighbor = new Board(tiles);
+            neighbor.tiles[emptyi][emptyj] = tiles[emptyi - 1][emptyj];
+            neighbor.tiles[emptyi - 1][emptyj] = 0;
+            neighbors.enqueue(neighbor);
+        }
+
+        // swap with right
+        if (emptyi + 1 < N) {
+            Board neighbor = new Board(tiles);
+            neighbor.tiles[emptyi][emptyj] = tiles[emptyi + 1][emptyj];
+            neighbor.tiles[emptyi + 1][emptyj] = 0;
+            neighbors.enqueue(neighbor);
+        }
+
+        // swap with up
+        if (emptyj - 1 >= 0) {
+            Board neighbor = new Board(tiles);
+            neighbor.tiles[emptyi][emptyj] = tiles[emptyi][emptyj - 1];
+            neighbor.tiles[emptyi][emptyj - 1] = 0;
+            neighbors.enqueue(neighbor);
+        }
+
+        // swap with down
+        if (emptyj + 1 < N) {
+            Board neighbor = new Board(tiles);
+            neighbor.tiles[emptyi][emptyj] = tiles[emptyi][emptyj + 1];
+            neighbor.tiles[emptyi][emptyj + 1] = 0;
+            neighbors.enqueue(neighbor);
+        }
+
+        return neighbors;
     }
 
     // string representation of the board (in the output format specified below)
@@ -129,4 +180,25 @@ public class Board {
         }
         return s.toString();
     }
+
+    public static void main(String[] args) {
+        // create initial board from file
+        In in = new In(args[0]);
+        int N = in.readInt();
+        int[][] blocks = new int[N][N];
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                blocks[i][j] = in.readInt();
+        Board initial = new Board(blocks);
+
+        // StdOut.println(initial.manhattan());
+        // StdOut.println(initial.manhattan());
+
+        StdOut.println(initial);
+        StdOut.println("neighbors");
+        for (Board board : initial.neighbors()) {
+            StdOut.println(board);
+        }
+    }
+
 }
