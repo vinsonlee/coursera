@@ -7,7 +7,7 @@ public class Board {
     public Board(int[][] blocks) {
         N  = blocks.length;
         tiles = new int[N][N];
-        
+
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 blocks[i][j] = tiles[i][j];
@@ -42,7 +42,33 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        return false;
+        if (y == this) {
+            return true;
+        }
+
+        if (y == null) {
+            return false;
+        }
+
+        if (y.getClass() != this.getClass()) {
+            return false;
+        }
+
+        Board that = (Board) y;
+
+        if (this.N != that.N) {
+            return false;
+        }
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (this.tiles[i][j] != that.tiles[i][j]) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     // all neighboring boards
