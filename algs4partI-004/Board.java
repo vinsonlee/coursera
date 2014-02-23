@@ -17,22 +17,63 @@ public class Board {
 
     // board dimension N
     public int dimension() {
-        return 0;
+        return N;
     }
 
     // number of blocks out of place
     public int hamming() {
-        return 0;
+        int distance = 0;
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (i == N - 1 && j == N - 1) {
+                    continue;
+                }
+
+                if (tiles[i][j] != i * N + j + 1) {
+                    distance++;
+                }
+            }
+        }
+
+        return distance;
     }
 
     // sum of Manhattan distances between blocks and goal
     public int manhattan() {
-        return 0;
+        int distance = 0;
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (tiles[i][j] == 0) {
+                    continue;
+                }
+
+                int expectedi = (tiles[i][j] - 1) / N;
+                int expectedj = (tiles[i][j] - 1) % N;
+
+                distance += Math.abs(i - expectedi);
+                distance += Math.abs(j - expectedj);
+            }
+        }
+
+        return distance;
     }
 
     // is this board the goal board?
     public boolean isGoal() {
-        return false;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (i == N - 1 && j == N - 1) {
+                    if (tiles[i][j] != 0) {
+                        return false;
+                    } else if (tiles[i][j] != i * N + j + 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     // a board obtained by exchanging two adjacent blocks in the same row
