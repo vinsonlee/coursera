@@ -43,6 +43,7 @@ public class Solver {
             } else if (twin.board.isGoal()) {
                 solvable = false;
                 moves = -1;
+                solution = null;
                 break;
             } else {
                 for (Board board : node.board.neighbors()) {
