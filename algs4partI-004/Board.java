@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class Board {
     private int N;
     private int[][] tiles;
@@ -116,15 +118,7 @@ public class Board {
             return false;
         }
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (this.tiles[i][j] != that.tiles[i][j]) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return Arrays.deepEquals(this.tiles, that.tiles);
     }
 
     // all neighboring boards
