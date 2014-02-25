@@ -1,22 +1,23 @@
 public class Solver {
     private boolean solvable;
-    private MinPQ<Node> pq;
+    private MinPQ<Node> pq1;
+    private MinPQ<Node> pq2;
     private Queue<Board> solution;
     private int moves;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         solvable = false;
-        pq = new MinPQ<Node>();
+        pq1 = new MinPQ<Node>();
+        pq2 = new MinPQ<Node>(); // twin
         solution = new Queue<Board>();
         moves = 0;
 
-        Node initialNode = new Node();
-        initialNode.board = initial;
-        initialNode.moves = 0;
-        initialNode.prev = null;
+        Node initialNode = new Node(initial);
+        pq1.insert(initialNode);
 
-        pq.insert(initialNode);
+        Node initialTwin = new Node(initial.twin());
+        pq2.insert(initialTwin);
 
         int step = 0;
 
@@ -26,27 +27,44 @@ public class Solver {
             for (Node n : pq) {
                 StdOut.println(n);
             }
-             */
             step++;
+             */
 
-            Node node = pq.delMin();
+            Node node = pq1.delMin();
             solution.enqueue(node.board);
+
+            Node twin = pq2.delMin();
 
             // check node isGoal
             if (node.board.isGoal()) {
                 solvable = true;
                 moves = node.moves;
                 break;
+            } else if (twin.board.isGoal()) {
+                solvable = false;
+                moves = -1;
+                break;
             } else {
                 for (Board board : node.board.neighbors()) {
-                    Node neighborNode = new Node();
-                    neighborNode.board = board;
+                    Node neighborNode = new Node(board);
                     neighborNode.moves = node.moves + 1;
                     neighborNode.prev = node;
 
                     if (node.prev == null
                         || !neighborNode.board.equals(node.prev.board)) {
-                        pq.insert(neighborNode);
+                        pq1.insert(neighborNode);
+                    }
+                }
+
+                // twin path
+                for (Board board : twin.board.neighbors()) {
+                    Node neighborNode = new Node(board);
+                    neighborNode.moves = twin.moves + 1;
+                    neighborNode.prev = twin;
+
+                    if (twin.prev == null
+                        || !neighborNode.board.equals(twin.prev.board)) {
+                        pq2.insert(neighborNode);
                     }
                 }
             }
@@ -72,6 +90,12 @@ public class Solver {
         private Board board;
         private int moves;
         private Node prev;
+
+        public Node(Board initial) {
+            board = initial;
+            moves = 0;
+            prev = null;
+        }
 
         public int compareTo(Node that) {
             return this.priority() - that.priority();
