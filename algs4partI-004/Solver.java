@@ -13,10 +13,10 @@ public class Solver {
         solution = new Queue<Board>();
         moves = 0;
 
-        Node initialNode = new Node(initial);
+        Node initialNode = new Node(initial, 0, null);
         pq1.insert(initialNode);
 
-        Node initialTwin = new Node(initial.twin());
+        Node initialTwin = new Node(initial.twin(), 0, null);
         pq2.insert(initialTwin);
 
         int step = 0;
@@ -47,9 +47,7 @@ public class Solver {
                 break;
             } else {
                 for (Board board : node.board.neighbors()) {
-                    Node neighborNode = new Node(board);
-                    neighborNode.moves = node.moves + 1;
-                    neighborNode.prev = node;
+                    Node neighborNode = new Node(board, node.moves + 1, node);
 
                     if (node.prev == null
                         || !neighborNode.board.equals(node.prev.board)) {
@@ -59,9 +57,7 @@ public class Solver {
 
                 // twin path
                 for (Board board : twin.board.neighbors()) {
-                    Node neighborNode = new Node(board);
-                    neighborNode.moves = twin.moves + 1;
-                    neighborNode.prev = twin;
+                    Node neighborNode = new Node(board, twin.moves + 1, twin);
 
                     if (twin.prev == null
                         || !neighborNode.board.equals(twin.prev.board)) {
@@ -88,37 +84,34 @@ public class Solver {
     }
 
     private class Node implements Comparable<Node> {
-        private Board board;
-        private int moves;
-        private Node prev;
+        private final Board board;
+        private final int moves;
+        private final Node prev;
+        private final int manhattan;
+        private final int priority;
 
-        public Node(Board initial) {
-            board = initial;
-            moves = 0;
-            prev = null;
+        public Node(Board initial, int moves, Node prev) {
+            this.board = initial;
+            this.moves = moves;
+            this.prev = prev;
+            this.manhattan = this.board.manhattan();
+            this.priority = this.moves + this.manhattan;
         }
 
         public int compareTo(Node that) {
-            return this.priority() - that.priority();
-
-            /*
-            if (this.priority() != that.priority()) {
-                return this.priority() - that.priority();
-            } else {
-                return this.moves - that.moves;
-            }
-             */
+            return this.priority - that.priority;
         }
 
         public int priority() {
-            return moves + board.manhattan();
+            assert priority == manhattan + moves;
+            return priority;
         }
 
         public String toString() {
             String s = "";
-            s += "priority  = " + priority() + "\n";
+            s += "priority  = " + priority + "\n";
             s += "moves     = " + moves + "\n";
-            s += "manhattan = " + board.manhattan() + "\n";
+            s += "manhattan = " + manhattan + "\n";
             s += board;
 
             return s.toString();
