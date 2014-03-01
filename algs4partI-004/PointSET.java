@@ -28,15 +28,37 @@ public class PointSET {
 
     // draw all of the points to standard draw
     public void draw() {
+        for (Point2D p : set) {
+            p.draw();
+        }
     }
 
     // all points in the set that are inside the rectangle
     public Iterable<Point2D> range(RectHV rect) {
-        return null;
+        Queue<Point2D> q = new Queue<Point2D>();
+
+        for (Point2D p : set) {
+            if (rect.contains(p)) {
+                q.enqueue(p);
+            }
+        }
+
+        return q;
     }
 
     // a nearest neighbor in the set to p; null if set is empty
     public Point2D nearest(Point2D p) {
-        return null;
+        Point2D nearestNeighbor = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        for (Point2D neighbor : set) {
+            double distance = p.distanceTo(neighbor);
+            if (distance < nearestDistance) {
+                nearestNeighbor = neighbor;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearestNeighbor;
     }
 }
