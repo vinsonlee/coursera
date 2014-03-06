@@ -3,6 +3,7 @@ public class KdTree {
     private static final boolean HORIZONTAL = false;
 
     private Node root;
+    private int size;
 
     private static class Node {
         // the point
@@ -41,29 +42,23 @@ public class KdTree {
 
     // construct an empty set of points
     public KdTree() {
+        size = 0;
     }
 
     // is the set empty?
     public boolean isEmpty() {
-        return size() == 0;
+        return size == 0;
     }
 
     // number of points in the set
     public int size() {
-        return size(root);
-    }
-
-    private int size(Node x) {
-        if (x == null) {
-            return 0;
-        } else {
-            return 1 + size(x.lb) + size(x.rt);
-        }
+        return size;
     }
 
     // add the point p to the set (if it is not already in the set)
     public void insert(Point2D p) {
         root = insert(root, p, VERTICAL, new RectHV(0, 0, 1, 1));
+        size++;
     }
 
     private Node insert(Node x, Point2D p, boolean orientation, RectHV rect) {
@@ -88,7 +83,7 @@ public class KdTree {
                 subrect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), x.p.y());
             }
             x.lb = insert(x.lb, p, !orientation, subrect);
-        } else if (cmp > 0) {
+        } else if (cmp >= 0) {
             RectHV subrect;
             if (orientation == VERTICAL) {
                 assert p.x() >= rect.xmin();
@@ -98,6 +93,7 @@ public class KdTree {
             }
             x.rt = insert(x.rt, p, !orientation, subrect);
         } else {
+            assert false;
             x.p = p;
         }
 
@@ -160,15 +156,29 @@ public class KdTree {
     }
 
     // all points in the set that are inside the rectangle
-    public Iterable<Point2D> range(RectHV r) {
+    public Iterable<Point2D> range(RectHV rect) {
         Queue<Point2D> q = new Queue<Point2D>();
+        range(root, rect, q);
         return q;
+    }
+
+    private void range(Node x, RectHV rect, Queue<Point2D> q) {
+        if (x != null) {
+            if (rect.contains(x.p)) {
+                q.enqueue(x.p);
+            }
+
+            // FIXME - pruning
+            range(x.lb, rect, q);
+            range(x.rt, rect, q);
+        }
     }
 
     // a nearest neighbor in the set to p; null if set is empty
     public Point2D nearest(Point2D p) {
         return new Point2D(0, 0);
     }
+
 
     /*
     public String toString() {
@@ -186,8 +196,31 @@ public class KdTree {
         kdtree.insert(new Point2D(.2, .3));
         kdtree.insert(new Point2D(.4, .7));
         kdtree.insert(new Point2D(.9, .6));
-        //assert kdtree.size() == 5;
+        assert kdtree.size() == 5;
+        //StdOut.println(kdtree);
+
+        kdtree = new KdTree();
+        kdtree.insert(new Point2D(0.206107, 0.095492));
+        kdtree.insert(new Point2D(0.975528, 0.654508));
+        kdtree.insert(new Point2D(0.024472, 0.345492));
+        kdtree.insert(new Point2D(0.793893, 0.095492));
+        kdtree.insert(new Point2D(0.793893, 0.904508));
+        kdtree.insert(new Point2D(0.975528, 0.345492));
+        assert kdtree.size() == 6;
+        kdtree.insert(new Point2D(0.206107, 0.904508));
         StdOut.println(kdtree);
+        assert kdtree.size() == 7;
+
+
+        /*
+
+
+
+                             0.500000 0.000000
+                             0.024472 0.654508
+                             0.500000 1.000000)
+         */
+        StdOut.println("size: " + kdtree.size());
 
         /*
         StdDraw.show(0);
@@ -195,5 +228,22 @@ public class KdTree {
         kdtree.draw();
         StdDraw.show(0);
          */
+
+
+        /*
+        String filename;
+        In in;
+        // Test 1a: Insert N distinct points and check size() after each insertion
+        // 100000 random distinct points in 100000-by-100000 grid
+        filename = "kdtree/input100K.txt";
+        in = new In(filename);
+        kdtree = new KdTree();
+        for (int i = 0; i < 100000; i++) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+
+        }
+         */
+
     }
 }
