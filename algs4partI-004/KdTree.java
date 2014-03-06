@@ -58,12 +58,16 @@ public class KdTree {
     // add the point p to the set (if it is not already in the set)
     public void insert(Point2D p) {
         root = insert(root, p, VERTICAL, new RectHV(0, 0, 1, 1));
-        size++;
     }
 
     private Node insert(Node x, Point2D p, boolean orientation, RectHV rect) {
         if (x == null) {
+            size++;
             return new Node(p, rect);
+        }
+
+        if (x.p.equals(p)) {
+            return x;
         }
 
         double cmp;
@@ -83,7 +87,7 @@ public class KdTree {
                 subrect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), x.p.y());
             }
             x.lb = insert(x.lb, p, !orientation, subrect);
-        } else if (cmp >= 0) {
+        } else {
             RectHV subrect;
             if (orientation == VERTICAL) {
                 assert p.x() >= rect.xmin();
@@ -92,9 +96,6 @@ public class KdTree {
                 subrect = new RectHV(rect.xmin(), x.p.y(), rect.xmax(), rect.ymax());
             }
             x.rt = insert(x.rt, p, !orientation, subrect);
-        } else {
-            assert false;
-            x.p = p;
         }
 
         return x;
