@@ -57,7 +57,44 @@ public class KdTree {
 
     // add the point p to the set (if it is not already in the set)
     public void insert(Point2D p) {
-        root = insert(root, p, VERTICAL, new RectHV(0, 0, 1, 1));
+        //root = insert(root, p, VERTICAL, new RectHV(0, 0, 1, 1));
+        root = insert(root, p, VERTICAL, 0, 0, 1, 1);
+    }
+
+    private Node insert(Node x, Point2D p, boolean orientation,
+                        double xmin, double ymin, double xmax, double ymax) {
+        if (x == null) {
+            this.size++;
+            return new Node(p, new RectHV(xmin, ymin, xmax, ymax));
+        }
+
+        if (x.p.equals(p)) {
+            return x;
+        }
+
+        if (orientation == VERTICAL) {
+            double cmp = p.x() - x.p.x();
+
+            if (cmp < 0) {
+                x.lb = insert(x.lb, p, !orientation,
+                              x.rect.xmin(), x.rect.ymin(), x.p.x(), x.rect.ymax());
+            } else {
+                x.rt = insert(x.rt, p, !orientation,
+                              x.p.x(), x.rect.ymin(), x.rect.xmax(), x.rect.ymax());
+            }
+        } else {
+            double cmp = p.y() - x.p.y();
+
+            if (cmp < 0) {
+                x.lb = insert(x.lb, p, !orientation,
+                              x.rect.xmin(), x.rect.ymin(), x.rect.xmax(), x.p.y());
+            } else {
+                x.rt = insert(x.rt, p, !orientation,
+                              x.rect.xmin(), x.p.y(), x.rect.xmax(), x.rect.ymax());
+            }
+        }
+
+        return x;
     }
 
     private Node insert(Node x, Point2D p, boolean orientation, RectHV rect) {
