@@ -4,7 +4,7 @@ public class SAP {
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
-        this.G = G;
+        this.G = new Digraph(G);
         bfs = new BreadthFirstDirectedPaths[this.G.V()];
     }
 
@@ -36,6 +36,10 @@ public class SAP {
                 }
             }
         }
+
+        // save memory
+        bfs[v] = null;
+        bfs[w] = null;
 
         if (length != Integer.MAX_VALUE) {
             return length;
@@ -75,6 +79,10 @@ public class SAP {
                 }
             }
         }
+
+        // save memory
+        bfs[v] = null;
+        bfs[w] = null;
 
         return ancestor;
     }
