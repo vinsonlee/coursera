@@ -61,7 +61,28 @@ public class WordNet {
         }
 
         sap = new SAP(G);
-        // StdOut.println(G);
+
+        // check cycle
+        DirectedCycle finder = new DirectedCycle(G);
+        if (finder.hasCycle()) {
+            throw new IllegalArgumentException();
+        }
+
+        // Find all roots
+        SET<Integer> roots = new SET<Integer>();
+        for (int i = 0; i < G.V(); i++) {
+            DirectedDFS dfs = new DirectedDFS(G, i);
+            if (dfs.count() == 1) {
+                roots.add(i);
+            }
+        }
+        assert roots.size() > 0;
+
+        // StdOut.println("roots.size(): " + roots.size());
+
+        if (roots.size() > 1) {
+            throw new IllegalArgumentException();
+        }
     }
 
     // returns all WordNet nouns
@@ -118,5 +139,25 @@ public class WordNet {
 
         StdOut.println(wordnet.distance("cool_medium", "palm_nut"));
         StdOut.println(wordnet.sap("cool_medium", "palm_nut"));
+
+        boolean pass;
+
+        pass = false;
+        try {
+            wordnet = new WordNet("synsets3.txt", "hypernymsInvalidTwoRoots.txt");
+        } catch (IllegalArgumentException e) {
+            pass = true;
+        } finally {
+            assert pass;
+        }
+
+        pass = false;
+        try {
+            wordnet = new WordNet("synsets3.txt", "hypernymsInvalidCycle.txt");
+        } catch (IllegalArgumentException e) {
+            pass = true;
+        } finally {
+            assert pass;
+        }
     }
 }
