@@ -1,6 +1,6 @@
 public class WordNet {
-    // maps synset id to set of nouns
-    private ST<Integer, SET<String>> idMap;
+    // maps synset id to synsets string
+    private ST<Integer, String> idMap;
 
     // maps nouns to set of synset ids
     private ST<String, SET<Integer>> nounMap;
@@ -12,7 +12,7 @@ public class WordNet {
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
         nounMap = new ST<String, SET<Integer>>();
-        idMap = new ST<Integer, SET<String>>();
+        idMap = new ST<Integer, String>();
 
         // The synsets ids are in increasing order.
         // Save the last synset id to determine digraph size.
@@ -31,7 +31,7 @@ public class WordNet {
             for (String noun : nouns) {
                 set.add(noun);
             }
-            idMap.put(id, set);
+            idMap.put(id, tokens[1]);
 
             for (String noun : nouns) {
                 if (nounMap.contains(noun)) {
@@ -104,7 +104,7 @@ public class WordNet {
         SET<Integer> idsB = nounMap.get(nounB);
 
         int ancestor = sap.ancestor(idsA, idsB);
-        return idMap.get(ancestor).min();
+        return idMap.get(ancestor);
     }
 
     // do unit testing of this class
@@ -115,5 +115,8 @@ public class WordNet {
 
         StdOut.println(wordnet.distance("liberalism", "spider_nevus"));
         StdOut.println(wordnet.sap("liberalism", "spider_nevus"));
+
+        StdOut.println(wordnet.distance("cool_medium", "palm_nut"));
+        StdOut.println(wordnet.sap("cool_medium", "palm_nut"));
     }
 }
