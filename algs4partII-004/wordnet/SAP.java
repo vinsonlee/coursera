@@ -10,6 +10,14 @@ public class SAP {
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
+        if (v < 0 || v > G.V() - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (w < 0 || w > G.V() - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+
         if (bfs[v] == null) {
             bfs[v] = new BreadthFirstDirectedPaths(G, v);
         }
@@ -39,6 +47,14 @@ public class SAP {
     // a common ancestor of v and w that participates in a shortest ancestral
     // path; -1 if no such path
     public int ancestor(int v, int w) {
+        if (v < 0 || v > G.V() - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (w < 0 || w > G.V() - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+
         if (bfs[v] == null) {
             bfs[v] = new BreadthFirstDirectedPaths(G, v);
         }
@@ -48,7 +64,7 @@ public class SAP {
         }
 
         int length = Integer.MAX_VALUE;
-        int ancestor = Integer.MAX_VALUE;
+        int ancestor = -1;
 
         for (int i = 0; i < G.V(); i++) {
             if (bfs[v].hasPathTo(i) && bfs[w].hasPathTo(i)) {
@@ -60,23 +76,56 @@ public class SAP {
             }
         }
 
-        if (length != Integer.MAX_VALUE) {
-            return ancestor;
-        } else {
-            return -1;
-        }
+        return ancestor;
     }
 
     // length of shortest ancestral path between any vertex in v and any vertex
     // in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        return -1;
+        if (v == null || w == null) {
+            throw new NullPointerException();
+        }
+
+        int length = Integer.MAX_VALUE;
+        for (int i : v) {
+            for (int j : w) {
+                int l = length(i, j);
+                if (l != -1 && l < length) {
+                    length = l;
+                }
+            }
+        }
+
+        assert length != -1;
+
+        if (length != Integer.MAX_VALUE) {
+            return length;
+        } else {
+            return -1;
+        }
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no
     // such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        return -1;
+        if (v == null || w == null) {
+            throw new NullPointerException();
+        }
+
+        int length = Integer.MAX_VALUE;
+        int ancestor = -1;
+
+        for (int i : v) {
+            for (int j : w) {
+                int l = length(i, j);
+                if (l != -1 && l < length) {
+                    length = l;
+                    ancestor = ancestor(i, j);
+                }
+            }
+        }
+        assert length != -1;
+        return ancestor;
     }
 
     // do unit testing of this class
