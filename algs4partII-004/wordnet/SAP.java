@@ -5,7 +5,7 @@ public class SAP {
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
         this.G = G;
-        bfs = new BreadthFirstDirectedPaths[G.V()];
+        bfs = new BreadthFirstDirectedPaths[this.G.V()];
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
