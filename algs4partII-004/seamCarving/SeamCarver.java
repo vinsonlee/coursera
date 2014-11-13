@@ -23,6 +23,29 @@ public class SeamCarver {
 
     /// energy of pixel at column x and row y
     public double energy(int x, int y) {
+        if (x < 0 || x >= picture.width()) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (y < 0 || y >= picture.height()) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (x == 0 || x == picture.width() - 1
+            || y == 0 || y == picture.height() - 1) {
+            return 195075;
+        } else {
+            return xGradientSquared(x, y) + yGradientSquared(x, y);
+        }
+    }
+
+    private double xGradientSquared(int x, int y) {
+        double result = 0;
+        // result +=
+        return 0;
+    }
+
+    private double yGradientSquared(int x, int y) {
         return 0;
     }
 
@@ -50,13 +73,14 @@ public class SeamCarver {
 
         picture = new Picture("seamCarving/6x5.png");
         seamCarver = new SeamCarver(picture);
-        // should be 195075.0
-        StdOut.println(seamCarver.energy(0, 0));
+        StdOut.println(seamCarver.energy(0, 0));  // should be 195075.0
+        StdOut.println(seamCarver.energy(1, 1));  // should be 56334.0
+
         // should be 6
         StdOut.println(seamCarver.width());
         // should be 5
         StdOut.println(seamCarver.height());
         // should be 4
-        StdOut.println(seamCarver.findVerticalSeam().length);
+        // StdOut.println(seamCarver.findVerticalSeam().length);
     }
 }
