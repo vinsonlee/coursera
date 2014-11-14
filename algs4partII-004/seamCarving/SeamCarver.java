@@ -39,14 +39,34 @@ public class SeamCarver {
         }
     }
 
-    private double xGradientSquared(int x, int y) {
-        double result = 0;
-        // result +=
-        return 0;
+    private int xGradientSquared(int x, int y) {
+        int redDiff = Math.abs(picture.get(x - 1, y).getRed()
+                               - picture.get(x + 1, y).getRed());
+
+        int greenDiff = Math.abs(picture.get(x - 1, y).getGreen()
+                               - picture.get(x + 1, y).getGreen());
+
+        int blueDiff = Math.abs(picture.get(x - 1, y).getBlue()
+                               - picture.get(x + 1, y).getBlue());
+
+        // StdOut.println(redDiff + " " + greenDiff + " " + blueDiff);
+        // StdOut.println(redDiff*redDiff + greenDiff*greenDiff + blueDiff*blueDiff);
+        return redDiff * redDiff + greenDiff * greenDiff + blueDiff * blueDiff;
     }
 
     private double yGradientSquared(int x, int y) {
-        return 0;
+        int redDiff = Math.abs(picture.get(x, y - 1).getRed()
+                               - picture.get(x, y + 1).getRed());
+
+        int greenDiff = Math.abs(picture.get(x, y - 1).getGreen()
+                               - picture.get(x, y + 1).getGreen());
+
+        int blueDiff = Math.abs(picture.get(x, y - 1).getBlue()
+                               - picture.get(x, y + 1).getBlue());
+
+        // StdOut.println(redDiff + " " + greenDiff + " " + blueDiff);
+        // StdOut.println(redDiff*redDiff + greenDiff*greenDiff + blueDiff*blueDiff);
+        return redDiff * redDiff + greenDiff * greenDiff + blueDiff * blueDiff;
     }
 
     // sequence of indices for horizontal seam
@@ -73,8 +93,15 @@ public class SeamCarver {
 
         picture = new Picture("seamCarving/6x5.png");
         seamCarver = new SeamCarver(picture);
-        StdOut.println(seamCarver.energy(0, 0));  // should be 195075.0
-        StdOut.println(seamCarver.energy(1, 1));  // should be 56334.0
+        // StdOut.println(seamCarver.energy(0, 0));  // should be 195075.0
+        // StdOut.println(seamCarver.energy(1, 1));  // should be 56334.0
+
+        for (int i = 0; i < seamCarver.width(); i++) {
+            for (int j = 0; j < seamCarver.height(); j++) {
+                StdOut.println("energy(" + i + "," + j + "): "
+                               + seamCarver.energy(i, j));
+            }
+        }
 
         // should be 6
         StdOut.println(seamCarver.width());
