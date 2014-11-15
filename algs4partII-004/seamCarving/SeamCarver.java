@@ -74,7 +74,25 @@ public class SeamCarver {
 
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
-        return null;
+        // Transpose picture.
+        Picture original = picture;
+        Picture transpose = new Picture(original.height(), original.width());
+
+        for (int w = 0; w < transpose.width(); w++) {
+            for (int h = 0; h < transpose.height(); h++) {
+                transpose.set(w, h, original.get(h, w));
+            }
+        }
+
+        this.picture = transpose;
+
+        // call findVerticalSeam
+        int[] seam = findVerticalSeam();
+
+        // Transpose back.
+        this.picture = original;
+
+        return seam;
     }
 
     // sequence of indices for vertical seam
@@ -114,7 +132,7 @@ public class SeamCarver {
         */
         for (int y = 0; y < height() - 1; y++) {
             for (int x = 0; x < width(); x++) {
-                // StdOut.println("visiting vertice (" + x + "," + y + ")");
+                // StdOut.println("visiting vertex (" + x + "," + y + ")");
                 if (x > 0) {
                     relax(x, y, x - 1, y + 1);
                 }
@@ -136,15 +154,6 @@ public class SeamCarver {
         }
          */
 
-        // 6x5.png case
-        /*
-        StdOut.println("energyTo(2, 0): " + energyTo[2][0]);
-        StdOut.println("energyTo(3, 1): " + energyTo[3][1]);
-        StdOut.println("energyTo(3, 2): " + energyTo[3][2]);
-        StdOut.println("energyTo(3, 3): " + energyTo[3][3]);
-        StdOut.println("energyTo(2, 4): " + energyTo[2][4]);
-         */
-
         // find minimum energy path
         double minEnergy = Double.POSITIVE_INFINITY;
         int minEnergyX = -1;
@@ -155,6 +164,7 @@ public class SeamCarver {
             }
         }
         assert minEnergyX != -1;
+
         // StdOut.println(minEnergyX);
         // StdOut.println("Total energy: " + minEnergy);
 
@@ -167,8 +177,8 @@ public class SeamCarver {
             prevX = xTo[prevX][h];
         }
 
-        /*
         // print seam
+        /*
         for (int i = 0; i < seam.length; i++) {
             StdOut.print(seam[i] + " ");
         }
@@ -209,8 +219,8 @@ public class SeamCarver {
         Picture picture;
         SeamCarver seamCarver;
 
-        picture = new Picture("seamCarving/4x6.png");
-        //picture = new Picture("seamCarving/6x5.png");
+        // picture = new Picture("seamCarving/4x6.png");
+        picture = new Picture("seamCarving/6x5.png");
 
         seamCarver = new SeamCarver(picture);
         // StdOut.println(seamCarver.energy(0, 0));  // should be 195075.0
@@ -228,5 +238,7 @@ public class SeamCarver {
         StdOut.println(seamCarver.height());
         // should be 5
         StdOut.println(seamCarver.findVerticalSeam().length);
+
+        StdOut.println(seamCarver.findHorizontalSeam().length);
     }
 }
