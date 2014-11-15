@@ -1,8 +1,9 @@
+import java.util.Arrays;
+
 public class SeamCarver {
     private Picture picture;
     private double[][] energyTo;
     private int[][] xTo;
-    private int[][] yTo;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
@@ -112,7 +113,6 @@ public class SeamCarver {
     public int[] findVerticalSeam() {
         energyTo = new double[width()][height()];
         xTo = new int[width()][height()];
-        yTo = new int[width()][height()];
 
         for (int x = 0; x < width(); x++) {
             for (int y = 0; y < height(); y++) {
@@ -203,24 +203,75 @@ public class SeamCarver {
         if (energyTo[x2][y2] > energyTo[x1][y1] + energy(x2, y2)) {
             energyTo[x2][y2] = energyTo[x1][y1] + energy(x2, y2);
             xTo[x2][y2] = x1;
-            yTo[x2][y2] = y1;
         }
     }
 
     // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
+        // Transpose picture.
+        Picture original = picture;
+        Picture transpose = new Picture(original.height(), original.width());
+
+        for (int w = 0; w < transpose.width(); w++) {
+            for (int h = 0; h < transpose.height(); h++) {
+                transpose.set(w, h, original.get(h, w));
+            }
+        }
+
+        this.picture = transpose;
+        transpose = null;
+        original = null;
+
+        // call removeVerticalSeam
+        removeVerticalSeam(seam);
+
+        // Transpose back.
+        original = picture;
+        transpose = new Picture(original.height(), original.width());
+
+        for (int w = 0; w < transpose.width(); w++) {
+            for (int h = 0; h < transpose.height(); h++) {
+                transpose.set(w, h, original.get(h, w));
+            }
+        }
+
+        this.picture = transpose;
+        transpose = null;
+        original = null;
     }
 
     // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
+        if (seam == null) {
+            throw new NullPointerException();
+        }
+
+        if (seam.length != height()) {
+            throw new IllegalArgumentException();
+        }
+
+        Picture original = this.picture;
+        Picture carved = new Picture(original.width() - 1, original.height());
+
+        for (int h = 0; h < carved.height(); h++) {
+            for (int w = 0; w < seam[h]; w++) {
+                carved.set(w, h, original.get(w, h));
+            }
+            for (int w = seam[h]; w < carved.width(); w++) {
+                carved.set(w, h, original.get(w + 1, h));
+            }
+        }
+
+        this.picture = carved;
     }
 
     public static void main(String[] args) {
         Picture picture;
         SeamCarver seamCarver;
+        int[] seam;
 
-        // picture = new Picture("seamCarving/4x6.png");
-        picture = new Picture("seamCarving/6x5.png");
+        picture = new Picture("seamCarving/4x6.png");
+        // picture = new Picture("seamCarving/6x5.png");
 
         seamCarver = new SeamCarver(picture);
         // StdOut.println(seamCarver.energy(0, 0));  // should be 195075.0
@@ -236,9 +287,23 @@ public class SeamCarver {
         StdOut.println(seamCarver.width());
         // should be 5
         StdOut.println(seamCarver.height());
-        // should be 5
-        StdOut.println(seamCarver.findVerticalSeam().length);
 
-        StdOut.println(seamCarver.findHorizontalSeam().length);
+        // should be 5
+        seam = seamCarver.findVerticalSeam();
+        StdOut.println(seam.length);
+        StdOut.println(Arrays.toString(seam));
+        seamCarver.removeVerticalSeam(seam);
+
+        for (int i = 0; i < seamCarver.width(); i++) {
+            for (int j = 0; j < seamCarver.height(); j++) {
+                StdOut.println("energy(" + i + "," + j + "): "
+                               + seamCarver.energy(i, j));
+            }
+        }
+
+        seam = seamCarver.findHorizontalSeam();
+        StdOut.println(Arrays.toString(seam));
+        StdOut.println(seam.length);
+        seamCarver.removeHorizontalSeam(seam);
     }
 }
