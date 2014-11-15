@@ -27,16 +27,16 @@ public class SeamCarver {
 
     /// energy of pixel at column x and row y
     public double energy(int x, int y) {
-        if (x < 0 || x >= picture.width()) {
+        if (x < 0 || x >= width()) {
             throw new IndexOutOfBoundsException();
         }
 
-        if (y < 0 || y >= picture.height()) {
+        if (y < 0 || y >= height()) {
             throw new IndexOutOfBoundsException();
         }
 
-        if (x == 0 || x == picture.width() - 1
-            || y == 0 || y == picture.height() - 1) {
+        if (x == 0 || x == width() - 1
+            || y == 0 || y == height() - 1) {
             return 195075;
         } else {
             return xGradientSquared(x, y) + yGradientSquared(x, y);
@@ -53,8 +53,6 @@ public class SeamCarver {
         int blueDiff = Math.abs(picture.get(x - 1, y).getBlue()
                                - picture.get(x + 1, y).getBlue());
 
-        // StdOut.println(redDiff + " " + greenDiff + " " + blueDiff);
-        // StdOut.println(redDiff*redDiff + greenDiff*greenDiff + blueDiff*blueDiff);
         return redDiff * redDiff + greenDiff * greenDiff + blueDiff * blueDiff;
     }
 
@@ -68,8 +66,6 @@ public class SeamCarver {
         int blueDiff = Math.abs(picture.get(x, y - 1).getBlue()
                                - picture.get(x, y + 1).getBlue());
 
-        // StdOut.println(redDiff + " " + greenDiff + " " + blueDiff);
-        // StdOut.println(redDiff*redDiff + greenDiff*greenDiff + blueDiff*blueDiff);
         return redDiff * redDiff + greenDiff * greenDiff + blueDiff * blueDiff;
     }
 
@@ -97,19 +93,6 @@ public class SeamCarver {
     }
 
     // sequence of indices for vertical seam
-    /*
-     (x, y)
-       x---->
-      y
-      |
-      |
-      v
-      
-     (0, 0)  (1, 0)  (2, 0)
-     (0, 1)  (1, 1)  (2, 1)
-     (0, 2)  (1, 2)
-     (0, 3)  (1, 3)
-     */
     public int[] findVerticalSeam() {
         energyTo = new double[width()][height()];
         xTo = new int[width()][height()];
@@ -124,15 +107,8 @@ public class SeamCarver {
             energyTo[x][0] = 195075;
         }
 
-        /*
-        Topological topological = new Topological(G);
-        for (int v : topological.order())
-            for (DirectedEdge e : G.adj(v))
-                relax(e);
-        */
         for (int y = 0; y < height() - 1; y++) {
             for (int x = 0; x < width(); x++) {
-                // StdOut.println("visiting vertex (" + x + "," + y + ")");
                 if (x > 0) {
                     relax(x, y, x - 1, y + 1);
                 }
@@ -145,15 +121,6 @@ public class SeamCarver {
             }
         }
 
-        // print energyTo
-        /*
-        for (int x = 0; x < width(); x++) {
-            for (int y = 0; y < height(); y++) {
-                StdOut.println("energyTo(" + x + "," + y + "): " + energyTo[x][y]);
-            }
-        }
-         */
-
         // find minimum energy path
         double minEnergy = Double.POSITIVE_INFINITY;
         int minEnergyX = -1;
@@ -165,9 +132,6 @@ public class SeamCarver {
         }
         assert minEnergyX != -1;
 
-        // StdOut.println(minEnergyX);
-        // StdOut.println("Total energy: " + minEnergy);
-
         int[] seam = new int[height()];
         seam[height() - 1] = minEnergyX;
         int prevX = xTo[minEnergyX][height() - 1];
@@ -177,28 +141,9 @@ public class SeamCarver {
             prevX = xTo[prevX][h];
         }
 
-        // print seam
-        /*
-        for (int i = 0; i < seam.length; i++) {
-            StdOut.print(seam[i] + " ");
-        }
-        StdOut.println();
-         */
-
         return seam;
     }
 
-    /*
-    private void relax(DirectedEdge e)
-    {
-        int v = e.from(), w = e.to();
-        if (distTo[w] > distTo[v] + e.weight())
-            {
-                distTo[w] = distTo[v] + e.weight();
-                edgeTo[w] = e;
-            }
-    }
-    */
     private void relax(int x1, int y1, int x2, int y2) {
         if (energyTo[x2][y2] > energyTo[x1][y1] + energy(x2, y2)) {
             energyTo[x2][y2] = energyTo[x1][y1] + energy(x2, y2);
