@@ -1,45 +1,64 @@
-import java.util.ArrayList;
+//import java.util.ArrayList;
 //import java.util.Arrays;
 
 public class BaseballElimination {
     private int numberOfTeams;
+    private String[] teams;
     private int[] w;
     private int[] l;
     private int[] r;
     private int[][] g;
-    private ArrayList<String> teams;
-    private ST<String, Integer> teamToInt;
+    private ST<String, Integer> st;
+    private boolean[] isEliminated;
+    private SET<String>[] certificateOfElimination;
 
     // create a baseball division from given filename in format specified below
     public BaseballElimination(String filename) {
-        teamToInt = new ST<String, Integer>();
-
         In in = new In(filename);
-        numberOfTeams = Integer.parseInt(in.readLine());
 
-        teams = new ArrayList<String>(numberOfTeams);
+        numberOfTeams = in.readInt();
+
+        teams = new String[numberOfTeams];
         w = new int[numberOfTeams];
         l = new int[numberOfTeams];
         r = new int[numberOfTeams];
         g = new int[numberOfTeams][numberOfTeams];
 
-        for (int i = 0; i < numberOfTeams; i++) {
-            String line = in.readLine().trim();
-            String[] tokens = line.split("\\s+");
-            // StdOut.println(Arrays.toString(tokens));
-            assert tokens.length == 4 + numberOfTeams;
+        st = new ST<String, Integer>();
+        isEliminated = new boolean[numberOfTeams];
+        certificateOfElimination = (SET<String>[]) new SET[numberOfTeams];
 
-            teams.add(i, tokens[0]);
-            w[i] = Integer.parseInt(tokens[1]);
-            l[i] = Integer.parseInt(tokens[2]);
-            r[i] = Integer.parseInt(tokens[3]);
+        for (int i = 0; i < numberOfTeams; i++) {
+            teams[i] = in.readString();
+            w[i] = in.readInt();
+            l[i] = in.readInt();
+            r[i] = in.readInt();
 
             for (int j = 0; j < numberOfTeams; j++) {
-                g[i][j] = Integer.parseInt(tokens[j + 4]);
+                g[i][j] = in.readInt();
             }
 
-            teamToInt.put(tokens[0], i);
+            st.put(teams[i], i);
+            certificateOfElimination[i] = new SET<String>();
         }
+
+        // trivial elimination
+        for (int i = 0; i < numberOfTeams; i++) {
+            for (int j = 0; j < numberOfTeams; j++) {
+                if (i == j) {
+                    assert g[i][j] == 0;
+                    continue;
+                }
+
+                if (w[i] + r[i] < w[j]) {
+                    isEliminated[i] = true;
+                    certificateOfElimination[i].add(teams[j]);
+                }
+            }
+        }
+
+        // nontrivial elimination
+        // TODO
     }
 
     // number of teams
@@ -49,39 +68,56 @@ public class BaseballElimination {
 
     // all teams
     public Iterable<String> teams() {
-        return teams;
+        return st.keys();
     }
 
     // number of wins for given team
     public int wins(String team) {
-        return w[teamToInt.get(team)];
+        if (st.get(team) == null) {
+            throw new IllegalArgumentException();
+        }
+        return w[st.get(team)];
     }
 
     // number of losses for given team
     public int losses(String team) {
-        return l[teamToInt.get(team)];
+        if (st.get(team) == null) {
+            throw new IllegalArgumentException();
+        }
+        return l[st.get(team)];
     }
 
     // number of remaining games for given team
     public int remaining(String team) {
-        return r[teamToInt.get(team)];
+        if (st.get(team) == null) {
+            throw new IllegalArgumentException();
+        }
+        return r[st.get(team)];
     }
 
     // number of remaining games between team1 and team2
     public int against(String team1, String team2) {
-        return g[teamToInt.get(team1)][teamToInt.get(team2)];
+        if (st.get(team1) == null || st.get(team2) == null) {
+            throw new IllegalArgumentException();
+        }
+        return g[st.get(team1)][st.get(team2)];
     }
 
     // is given team eliminated?
     public boolean isEliminated(String team) {
-        return false;
+        if (st.get(team) == null) {
+            throw new IllegalArgumentException();
+        }
+        return isEliminated[st.get(team)];
     }
 
     // subset R of teams that eliminates given team; null if not eliminated
     public Iterable<String> certificateOfElimination(String team) {
-        return null;
+        if (st.get(team) == null) {
+            throw new IllegalArgumentException();
+        }
+        return certificateOfElimination[st.get(team)];
     }
-
 
     public static void main(String[] args) {
         BaseballElimination division = new BaseballElimination(args[0]);
