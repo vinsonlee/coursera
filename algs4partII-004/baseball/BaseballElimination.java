@@ -59,6 +59,12 @@ public class BaseballElimination {
 
         // nontrivial elimination
         // TODO
+
+        for (int i = 0; i < numberOfTeams; i++) {
+            if (certificateOfElimination[i].size() == 0) {
+                certificateOfElimination[i] = null;
+            }
+        }
     }
 
     // number of teams
@@ -108,6 +114,7 @@ public class BaseballElimination {
         if (st.get(team) == null) {
             throw new IllegalArgumentException();
         }
+
         return isEliminated[st.get(team)];
     }
 
