@@ -2,7 +2,7 @@
 //import java.util.Arrays;
 
 public class BaseballElimination {
-    private int numberOfTeams;
+    private final int numberOfTeams;
     private String[] teams;
     private int[] w;
     private int[] l;
@@ -17,13 +17,11 @@ public class BaseballElimination {
         In in = new In(filename);
 
         numberOfTeams = in.readInt();
-
         teams = new String[numberOfTeams];
         w = new int[numberOfTeams];
         l = new int[numberOfTeams];
         r = new int[numberOfTeams];
         g = new int[numberOfTeams][numberOfTeams];
-
         st = new ST<String, Integer>();
         isEliminated = new boolean[numberOfTeams];
         certificateOfElimination = (SET<String>[]) new SET[numberOfTeams];
@@ -42,7 +40,19 @@ public class BaseballElimination {
             certificateOfElimination[i] = new SET<String>();
         }
 
-        // trivial elimination
+        trivialElimination();
+        nonTrivialElimination();
+
+        // null out certificates of teams still alive
+        for (int i = 0; i < numberOfTeams; i++) {
+            if (!isEliminated[i]) {
+                assert certificateOfElimination[i].size() == 0;
+                certificateOfElimination[i] = null;
+            }
+        }
+    }
+
+    private void trivialElimination() {
         for (int i = 0; i < numberOfTeams; i++) {
             for (int j = 0; j < numberOfTeams; j++) {
                 if (i == j) {
@@ -56,13 +66,103 @@ public class BaseballElimination {
                 }
             }
         }
+    }
 
-        // nontrivial elimination
-        // TODO
+    private void nonTrivialElimination() {
+        final int numberOfGameVertices = ((numberOfTeams - 1)
+                                          * (numberOfTeams - 2)) / 2;
+        final int numberOfFlowNetworkVertices = 1
+                                                + numberOfGameVertices
+                                                + numberOfTeams - 1
+                                                + 1;
 
-        for (int i = 0; i < numberOfTeams; i++) {
-            if (certificateOfElimination[i].size() == 0) {
-                certificateOfElimination[i] = null;
+        for (int team = 0; team < numberOfTeams; team++) {
+            if (isEliminated[team]) {
+                continue;
+            }
+
+            int vertexNumber;
+
+            // map team number to vertex number in flow network
+            vertexNumber = numberOfGameVertices + 1;
+            ST<Integer, Integer> teamVertices = new ST<Integer, Integer>();
+            for (int i = 0; i < numberOfTeams; i++) {
+                if (i != team) {
+                    teamVertices.put(i, vertexNumber);
+                    vertexNumber++;
+                }
+            }
+
+            FlowNetwork G = new FlowNetwork(numberOfFlowNetworkVertices);
+
+            // add vertices to flow network
+            vertexNumber = 1;
+            for (int i = 0; i < numberOfTeams - 1; i++) {
+                if (i == team) {
+                    continue;
+                }
+
+                for (int j = i + 1; j < numberOfTeams; j++) {
+                    if (j == team) {
+                        continue;
+                    }
+
+                    FlowEdge e;
+
+                    e = new FlowEdge(0, vertexNumber, g[i][j]);
+                    G.addEdge(e);
+
+                    e = new FlowEdge(vertexNumber,
+                                     teamVertices.get(i),
+                                     Double.POSITIVE_INFINITY);
+                    G.addEdge(e);
+                    
+                    e = new FlowEdge(vertexNumber,
+                                     teamVertices.get(j),
+                                     Double.POSITIVE_INFINITY);
+                    G.addEdge(e);
+                    
+                    vertexNumber++;
+                }
+            }
+            assert vertexNumber == numberOfGameVertices + 1;
+
+            // TODO
+            // simply using teamVertices ST
+            for (int i = 0; i < numberOfTeams; i++) {
+                if (i == team) {
+                    continue;
+                }
+                FlowEdge e = new FlowEdge(vertexNumber,
+                                          numberOfFlowNetworkVertices - 1,
+                                          w[team] + r[team] - w[i]);
+                G.addEdge(e);
+                vertexNumber++;
+            }
+
+            assert vertexNumber == numberOfFlowNetworkVertices - 1;
+
+            FordFulkerson maxflow = new FordFulkerson(G, 0, G.V() - 1);
+
+            for (FlowEdge e : G.adj(0)) {
+                if (e.flow() != e.capacity()) {
+                    isEliminated[team] = true;
+                    break;
+                }
+            }
+            
+            // find certificate of elimination
+            if (isEliminated[team]) {
+            vertexNumber = numberOfGameVertices + 1;
+                for (int i = 0; i < numberOfTeams; i++) {
+                    if (i == team) {
+                        continue;
+                    }
+                    if (maxflow.inCut(vertexNumber)) {
+                        certificateOfElimination[team].add(teams[i]);
+                    }
+                    vertexNumber++;
+                }
             }
         }
     }
