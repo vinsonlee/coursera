@@ -1,6 +1,3 @@
-//import java.util.ArrayList;
-//import java.util.Arrays;
-
 public class BaseballElimination {
     private final int numberOfTeams;
     private String[] teams;
@@ -83,7 +80,7 @@ public class BaseballElimination {
 
             int vertexNumber;
 
-            // map team number to vertex number in flow network
+            // Map team number to vertex number in flow network.
             vertexNumber = numberOfGameVertices + 1;
             ST<Integer, Integer> teamVertices = new ST<Integer, Integer>();
             for (int i = 0; i < numberOfTeams; i++) {
@@ -95,7 +92,7 @@ public class BaseballElimination {
 
             FlowNetwork G = new FlowNetwork(numberOfFlowNetworkVertices);
 
-            // add vertices to flow network
+            // Add vertices to flow network.
             vertexNumber = 1;
             for (int i = 0; i < numberOfTeams - 1; i++) {
                 if (i == team) {
@@ -116,31 +113,26 @@ public class BaseballElimination {
                                      teamVertices.get(i),
                                      Double.POSITIVE_INFINITY);
                     G.addEdge(e);
-                    
+
                     e = new FlowEdge(vertexNumber,
                                      teamVertices.get(j),
                                      Double.POSITIVE_INFINITY);
                     G.addEdge(e);
-                    
+
                     vertexNumber++;
                 }
             }
             assert vertexNumber == numberOfGameVertices + 1;
 
-            // TODO
-            // simply using teamVertices ST
+            // Add edges from team vertices to target.
             for (int i = 0; i < numberOfTeams; i++) {
                 if (i == team) {
                     continue;
                 }
-                FlowEdge e = new FlowEdge(vertexNumber,
-                                          numberOfFlowNetworkVertices - 1,
+                FlowEdge e = new FlowEdge(teamVertices.get(i), G.V() - 1,
                                           w[team] + r[team] - w[i]);
                 G.addEdge(e);
-                vertexNumber++;
             }
-
-            assert vertexNumber == numberOfFlowNetworkVertices - 1;
 
             FordFulkerson maxflow = new FordFulkerson(G, 0, G.V() - 1);
 
@@ -150,18 +142,17 @@ public class BaseballElimination {
                     break;
                 }
             }
-            
-            // find certificate of elimination
+
+            // Find certificate of elimination.
             if (isEliminated[team]) {
-            vertexNumber = numberOfGameVertices + 1;
                 for (int i = 0; i < numberOfTeams; i++) {
                     if (i == team) {
                         continue;
                     }
-                    if (maxflow.inCut(vertexNumber)) {
+
+                    if (maxflow.inCut(teamVertices.get(i))) {
                         certificateOfElimination[team].add(teams[i]);
                     }
-                    vertexNumber++;
                 }
             }
         }
