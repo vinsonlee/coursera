@@ -232,6 +232,11 @@ public class TrieSET implements Iterable<String> {
         return null;
     }
 
+    public boolean hasPrefix(String query) {
+        Node x = get(root, query, 0);
+        return x != null;
+    }
+
 
     /**
      * Unit tests the <tt>TrieSET</tt> data type.
@@ -252,26 +257,30 @@ public class TrieSET implements Iterable<String> {
             StdOut.println();
         }
 
-        StdOut.println("longestPrefixOf(\"shellsort\"):");
-        StdOut.println(set.longestPrefixOf("shellsort"));
+        StdOut.println("longestPrefixOf(\"SHELLSORT\"):");
+        StdOut.println(set.longestPrefixOf("SHELLSORT"));
         StdOut.println();
 
-        StdOut.println("longestPrefixOf(\"xshellsort\"):");
-        StdOut.println(set.longestPrefixOf("xshellsort"));
+        StdOut.println("longestPrefixOf(\"XSHELLSORT\"):");
+        StdOut.println(set.longestPrefixOf("XSHELLSORT"));
         StdOut.println();
 
-        StdOut.println("keysWithPrefix(\"shor\"):");
-        for (String s : set.keysWithPrefix("shor"))
+        StdOut.println("keysWithPrefix(\"SHOR\"):");
+        for (String s : set.keysWithPrefix("SHOR"))
             StdOut.println(s);
         StdOut.println();
 
-        StdOut.println("keysWithPrefix(\"shortening\"):");
-        for (String s : set.keysWithPrefix("shortening"))
+        StdOut.println("keysWithPrefix(\"SHORTENING\"):");
+        for (String s : set.keysWithPrefix("SHORTENING"))
             StdOut.println(s);
         StdOut.println();
 
-        StdOut.println("keysThatMatch(\".he.l.\"):");
-        for (String s : set.keysThatMatch(".he.l."))
+        StdOut.println("keysThatMatch(\".HE.L.\"):");
+        for (String s : set.keysThatMatch(".HE.L."))
             StdOut.println(s);
+        StdOut.println();
+
+        StdOut.println("hasPrefix(\"SHOR\")");
+        StdOut.println(set.hasPrefix("SHOR"));
     }
 }
