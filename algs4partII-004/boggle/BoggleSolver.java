@@ -39,15 +39,9 @@ public class BoggleSolver
             word += letter;
         }
 
-        if (dictionary.hasPrefix(word) == false) {
+        if (!dictionary.hasPrefix(word)) {
             return;
         }
-
-        /*
-        if (((Queue<String>) dictionary.keysWithPrefix(word)).size() == 0) {
-            return;
-        }
-        */
 
         if (word.length() > 2 && dictionary.contains(word)) {
             set.add(word);
