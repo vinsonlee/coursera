@@ -1,8 +1,11 @@
 public class MoveToFront {
+    // alphabet size of extended ASCII
+    private static final int R = 256;
+
     // apply move-to-front encoding, reading from standard input and writing to standard output
     public static void encode() {
-        char[] sequence = new char[256];
-        for (int i = 0; i < sequence.length; i++) {
+        char[] sequence = new char[R];
+        for (int i = 0; i < R; i++) {
             sequence[i] = (char) i;
         }
 
@@ -33,6 +36,28 @@ public class MoveToFront {
 
     // apply move-to-front decoding, reading from standard input and writing to standard output
     public static void decode() {
+        char[] sequence = new char[R];
+        for (int i = 0; i < R; i++) {
+            sequence[i] = (char) i;
+        }
+
+        String s = BinaryStdIn.readString();
+        char[] input = s.toCharArray();
+
+        for (int i = 0; i < input.length; i++) {
+            // Read in each 8-bit character.
+            int in = input[i];
+            char ch = sequence[in];
+
+            // Write the ith character in the sequence.
+            BinaryStdOut.write(ch);
+
+            // Move that character to the front.
+            System.arraycopy(sequence, 0, sequence, 1, in);
+            sequence[0] = ch;
+        }
+
+        BinaryStdOut.close();
     }
 
     // if args[0] is '-', apply move-to-front encoding
