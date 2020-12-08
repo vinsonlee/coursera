@@ -95,16 +95,19 @@ public class SAP {
         }
 
         int length = Integer.MAX_VALUE;
-        for (int i : v) {
-            for (int j : w) {
-                int l = length(i, j);
-                if (l != -1 && l < length) {
+        BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(G, v);
+        BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(G, w);
+        
+        int length = Integer.MAX_VALUE;
+        for (int i = 0; i < G.V(); i++) {
+            if (bfsV.hasPathTo(i) && bfsW.hasPathTo(i)) {
+                int l = bfsV.distTo(i) + bfsW.distTo(i);
+                if (l < length) {
                     length = l;
                 }
             }
         }
-
-        assert length != -1;
+        
 
         if (length != Integer.MAX_VALUE) {
             return length;
